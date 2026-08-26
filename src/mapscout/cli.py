@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import sys
 from collections.abc import Sequence
+
+import httpx
 
 from mapscout.db.repo import (
     contar_api_calls,
@@ -68,11 +71,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Ponto de entrada da CLI."""
     args = montar_parser().parse_args(argv)
     if args.comando == "coletar":
-        executar_coleta(
-            categoria=args.categoria,
-            lat=args.lat,
-            lng=args.lng,
-            raio_m=args.raio_m,
-            cidade=args.cidade,
-        )
+        try:
+            executar_coleta(
+                categoria=args.categoria,
+                lat=args.lat,
+                lng=args.lng,
+                raio_m=args.raio_m,
+                cidade=args.cidade,
+            )
+        except RuntimeError as erro:
+            print(f"erro: {erro}", file=sys.stderr)
+            return 2
+        except httpx.HTTPStatusError as erro:
+            print(
+                f"erro: a Places API respondeu HTTP {erro.response.status_code} "
+                f"após 3 tentativas",
+                file=sys.stderr,
+            )
+            return 3
     return 0

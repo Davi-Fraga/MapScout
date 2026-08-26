@@ -84,3 +84,43 @@ def test_coletar_duas_vezes_nao_duplica(
 def test_coletar_exige_os_argumentos() -> None:
     with pytest.raises(SystemExit):
         main(["coletar", "--categoria", "dentista"])
+
+
+ARGS_VALIDOS = [
+    "coletar",
+    "--categoria",
+    "dentista",
+    "--lat",
+    "-22.9099",
+    "--lng",
+    "-47.0626",
+    "--raio-m",
+    "3000",
+    "--cidade",
+    "Campinas",
+]
+
+
+def test_sem_api_key_falha_com_mensagem_limpa(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.delenv("GOOGLE_MAPS_API_KEY", raising=False)
+
+    codigo = main(ARGS_VALIDOS)
+
+    assert codigo == 2
+    assert "GOOGLE_MAPS_API_KEY" in capsys.readouterr().err
+
+
+@respx.mock
+def test_api_fora_do_ar_falha_com_mensagem_limpa(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'teste.db'}")
+    monkeypatch.setattr("mapscout.sources.places_api.BACKOFF_BASE_S", 0.0)
+    respx.post(ENDPOINT).mock(return_value=httpx.Response(503))
+
+    codigo = main(ARGS_VALIDOS)
+
+    assert codigo == 3
+    assert "HTTP 503" in capsys.readouterr().err
