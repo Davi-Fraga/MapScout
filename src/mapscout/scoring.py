@@ -1,0 +1,1 @@
+"""Score determinístico de oportunidade."""

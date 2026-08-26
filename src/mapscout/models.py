@@ -1,0 +1,1 @@
+"""Tabelas SQLModel do domínio."""
