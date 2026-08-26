@@ -13,7 +13,7 @@ test:
 	uv run pytest -q
 
 coletar:
-	uv run mapscout
+	uv run mapscout coletar $(ARGS)
 
 api:
 	uv run uvicorn mapscout.web.app:app --reload

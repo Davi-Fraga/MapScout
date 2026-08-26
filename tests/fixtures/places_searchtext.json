@@ -1,0 +1,594 @@
+{
+  "places": [
+    {
+      "id": "ChIJ3Ssrf0rPyJQR-4Xd6fHI26k",
+      "types": [
+        "dentist",
+        "dental_clinic",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 3233-4558",
+      "formattedAddress": "Rua Barão de Jaguara, 655 - Centro, Campinas - SP, 13015-001",
+      "location": {
+        "latitude": -22.908821,
+        "longitude": -47.0569336
+      },
+      "rating": 4.5,
+      "googleMapsUri": "https://maps.google.com/?cid=12239597353645737467&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://www.doctoralia.com.br/beatriz-toriani/dentista/campinas?utm_source=google&utm_medium=gmb&utm_campaign=533062&utm_content=website",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 144,
+      "displayName": {
+        "text": "Dra. Beatriz Toriani, Dentista",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJXRay7yzPyJQRhkG2VmqUh34",
+      "types": [
+        "dentist",
+        "dental_clinic",
+        "doctor",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 99214-1001",
+      "formattedAddress": "Av. Orosimbo Maia, 430 - Sl 1512 - Vila Itapura, Campinas - SP, 13010-211",
+      "location": {
+        "latitude": -22.8970633,
+        "longitude": -47.0615308
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=9117419155077087622&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://mirianbustillodentista.com.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 392,
+      "displayName": {
+        "text": "Dra. Mirian Bustillo | Dentista",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJJ_ANuy7PyJQRal5qU_z3QV4",
+      "types": [
+        "dental_clinic",
+        "dentist",
+        "doctor",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 99907-5855",
+      "formattedAddress": "Av. da Saudade, 832 - Sl 02 - Pte. Preta, Campinas - SP, 13041-670",
+      "location": {
+        "latitude": -22.920660599999998,
+        "longitude": -47.0528094
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=6791982376154717802&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://www.andreaferrazdentista.com.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 174,
+      "displayName": {
+        "text": "Dra. Andrea Ferraz de Campos Dentista",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Médico",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJ-RjkULPIyJQRC8qvfI6f0jI",
+      "types": [
+        "dentist",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 3232-1636",
+      "formattedAddress": "Rua Barão de Jaguara, 1214 - Centro, Campinas - SP, 13015-002",
+      "location": {
+        "latitude": -22.9039652,
+        "longitude": -47.0591783
+      },
+      "rating": 3.8,
+      "googleMapsUri": "https://maps.google.com/?cid=3662164881331702283&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://mechameaqui.com.br/sorriso-feliz-clinica-odontologica-campinas-sp/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 33,
+      "displayName": {
+        "text": "Sorriso Feliz - Dente&Face",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJhYLlIkPPyJQRm5LRrAqAGsY",
+      "types": [
+        "dental_clinic",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 98201-2535",
+      "formattedAddress": "Condomínio Edifício Porto Cervo - R. Dr. Quirino, 524 - Sl 52 - Centro, Campinas - SP, 13015-080",
+      "location": {
+        "latitude": -22.909739899999998,
+        "longitude": -47.055386999999996
+      },
+      "rating": 4.9,
+      "googleMapsUri": "https://maps.google.com/?cid=14274862752241652379&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://redesags.wixsite.com/drathainasouza",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 61,
+      "displayName": {
+        "text": "Dra Thainá Souza - Dentista",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Clínica odontológica",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJMe0eyLTJyJQR0kB2Hpw701Y",
+      "types": [
+        "dentist",
+        "doctor",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 99921-1103",
+      "formattedAddress": "Rua Barão de Jaguara, 1481 - Sl 88 - Centro, Campinas - SP, 13012-900",
+      "location": {
+        "latitude": -22.9019323,
+        "longitude": -47.0605068
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=6256409849059754194&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 28,
+      "displayName": {
+        "text": "Dra. Vanessa Gonçalves | Dentista Campinas Centro",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJgyz6lC_PyJQRH_PLbgo_dUQ",
+      "types": [
+        "dentist",
+        "dental_clinic",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 3325-0025",
+      "formattedAddress": "R. Dr. Emílio Ribas, 447 - Cambuí, Campinas - SP, 13025-141",
+      "location": {
+        "latitude": -22.9004434,
+        "longitude": -47.049641099999995
+      },
+      "rating": 4.8,
+      "googleMapsUri": "https://maps.google.com/?cid=4932918280895329055&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://odontourgente.com.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 151,
+      "displayName": {
+        "text": "Dentista 24 horas | Odonto Urgente Campinas",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJk3RVzU_PyJQRWR_qBDwiZ8c",
+      "types": [
+        "dentist",
+        "dental_clinic",
+        "doctor",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "service",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 99409-5553",
+      "formattedAddress": "R. Dr. Emílio Ribas, 805 - Sl 61 - Cambuí, Campinas - SP, 13025-141",
+      "location": {
+        "latitude": -22.897174099999997,
+        "longitude": -47.051052
+      },
+      "rating": 4.9,
+      "googleMapsUri": "https://maps.google.com/?cid=14368490777324691289&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://www.dentista24horascampinas.com.br/google-meu-negocio/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 724,
+      "displayName": {
+        "text": "Dentista 24 Horas Campinas",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJg1M1ICzJyJQR2Sz_QMsCsBQ",
+      "types": [
+        "dental_clinic",
+        "dentist",
+        "doctor",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 99658-6181",
+      "formattedAddress": "R. Tiradentes, 446 - Vila Itapura, Campinas - SP, 13023-190",
+      "location": {
+        "latitude": -22.893107999999998,
+        "longitude": -47.0630349
+      },
+      "rating": 4.2,
+      "googleMapsUri": "https://maps.google.com/?cid=1490694548651715801&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 5,
+      "displayName": {
+        "text": "Dra. Ana Luiza Machado - | Dentista em Campinas | Aparelhos Invisíveis SOUSMILE",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Clínica odontológica",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJb3g_zrbIyJQRYhMdl8C7UqI",
+      "types": [
+        "dentist",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 3232-0681",
+      "formattedAddress": "Av. Campos Sales, 354 - Centro, Campinas - SP, 13010-080",
+      "location": {
+        "latitude": -22.906704599999998,
+        "longitude": -47.0649187
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=11696617618077979490&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 1,
+      "displayName": {
+        "text": "Dentista Dra. Vânia Cristina N. Horie",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJgzjL0zbPyJQRKTqUwXagxAg",
+      "types": [
+        "dentist",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 3307-1219",
+      "formattedAddress": "R. Boaventura do Amaral, 216 - Centro, Campinas - SP, 13015-192",
+      "location": {
+        "latitude": -22.911155400000002,
+        "longitude": -47.0513313
+      },
+      "rating": 3.1,
+      "googleMapsUri": "https://maps.google.com/?cid=631806279653014057&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "http://dentistacampinas.odo.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 11,
+      "displayName": {
+        "text": "Dra Carla Marcondes",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJjTW4rhrJyJQRYWoxpFqUV_E",
+      "types": [
+        "doctor",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 99336-1222",
+      "formattedAddress": "R. Dr. Sales de Oliveira, 455 - Vila Industrial (Campinas), Campinas - SP, 13035-270",
+      "location": {
+        "latitude": -22.9119968,
+        "longitude": -47.0646189
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=17390531603137129057&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://www.instagram.com/drguilhermemancini/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 13,
+      "displayName": {
+        "text": "Dr. Guilherme Mancini - Cirurgião Dentista",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Médico",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJgVi8prTIyJQRXMjhzp6Fhik",
+      "types": [
+        "dental_clinic",
+        "dentist",
+        "doctor",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 2513-4344",
+      "formattedAddress": "Rua Barão de Jaguara, 1147 - Centro, Campinas - SP, 13026-910",
+      "location": {
+        "latitude": -22.904604499999998,
+        "longitude": -47.059026599999996
+      },
+      "rating": 4.6,
+      "googleMapsUri": "https://maps.google.com/?cid=2992225919556503644&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://www.oralclincampinas.com.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 265,
+      "displayName": {
+        "text": "Oral Clin Campinas",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Clínica odontológica",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJGb76OEXPyJQRAKDdlgphEZo",
+      "types": [
+        "dentist",
+        "dental_clinic",
+        "doctor",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 3231-0784",
+      "formattedAddress": "Av. José de Sousa Campos, 1073 - Sl 14 - Cambuí, Campinas - SP, 13025-320",
+      "location": {
+        "latitude": -22.8964748,
+        "longitude": -47.047735400000008
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=11101761254553657344&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "http://www.pedroafonsoferreira.com.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 53,
+      "displayName": {
+        "text": "Dr. Pedro Afonso Ferreira",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJTRICQarIyJQRJ0SR7gbquWU",
+      "types": [
+        "dentist",
+        "insurance_agency",
+        "health",
+        "point_of_interest",
+        "service",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "0800 160 5555",
+      "formattedAddress": "Av. Brasil, 220 - Vila Itapura, Campinas - SP, 13023-075",
+      "location": {
+        "latitude": -22.8920767,
+        "longitude": -47.0618371
+      },
+      "rating": 3.3,
+      "googleMapsUri": "https://maps.google.com/?cid=7330147184015393831&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://uniodontocampinas.com.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 379,
+      "displayName": {
+        "text": "Uniodonto Campinas",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJ__9gA6TIyJQR71TFDm3OEcA",
+      "types": [
+        "dentist",
+        "doctor",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 99789-6252",
+      "formattedAddress": "R. Antônio Guimarães, 65 - Botafogo, Campinas - SP, 13020-310",
+      "location": {
+        "latitude": -22.8994941,
+        "longitude": -47.072406799999996
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=13840070097680815343&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 69,
+      "displayName": {
+        "text": "Dr. Caio Vinícius Signorelli Grohmann",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Médico",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJ0chn-EzPyJQRdoU0_uP9eaw",
+      "types": [
+        "dentist",
+        "dental_clinic",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 99958-1055",
+      "formattedAddress": "Avenida Benjamin Constant, 1680 Cambuí - Centro, Campinas - SP, 13010-140",
+      "location": {
+        "latitude": -22.9015321,
+        "longitude": -47.0558882
+      },
+      "rating": 4.9,
+      "googleMapsUri": "https://maps.google.com/?cid=12428243802369852790&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "http://www.odontologiapazotto.com.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 31,
+      "displayName": {
+        "text": "ODONTOLOGIA PAZOTTO",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJv-8CHdPHyJQRrIYij8zZU3A",
+      "types": [
+        "dentist",
+        "doctor",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 98395-7796",
+      "formattedAddress": "R. Dr. Emílio Ribas, 765 - Cambuí, Campinas - SP, 13025-141",
+      "location": {
+        "latitude": -22.897736,
+        "longitude": -47.0508004
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=8094052427912873644&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://drasandrabecerra.lovable.app/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 72,
+      "displayName": {
+        "text": "Dra Sandra Dentista Pacientes Especiais",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Médico",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJEUpuuy7PyJQReEPdwa0BVvE",
+      "types": [
+        "dentist",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 3231-9465",
+      "formattedAddress": "Av. da Saudade, 832 - Pte. Preta, Campinas - SP, 13041-670",
+      "location": {
+        "latitude": -22.9205474,
+        "longitude": -47.0527193
+      },
+      "rating": 3.4,
+      "googleMapsUri": "https://maps.google.com/?cid=17390088856931222392&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 14,
+      "displayName": {
+        "text": "Consultório de Dentistas - Ponte Preta",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Dentista",
+        "languageCode": "pt-BR"
+      }
+    },
+    {
+      "id": "ChIJj0Kf4O7GyJQRcrY4-5F_0xg",
+      "types": [
+        "dental_clinic",
+        "dentist",
+        "doctor",
+        "medical_clinic",
+        "health",
+        "point_of_interest",
+        "establishment"
+      ],
+      "nationalPhoneNumber": "(19) 98875-5828",
+      "formattedAddress": "Av. José de Sousa Campos, 1073 - Sl 407 - Cambuí, Campinas - SP, 13025-320",
+      "location": {
+        "latitude": -22.8963618,
+        "longitude": -47.047379299999996
+      },
+      "rating": 5,
+      "googleMapsUri": "https://maps.google.com/?cid=1788913741958002290&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://www.karinamarani.com.br/",
+      "businessStatus": "OPERATIONAL",
+      "userRatingCount": 86,
+      "displayName": {
+        "text": "Dra. Karina Marani Odontologia",
+        "languageCode": "pt"
+      },
+      "primaryTypeDisplayName": {
+        "text": "Clínica odontológica",
+        "languageCode": "pt-BR"
+      }
+    }
+  ],
+  "nextPageToken": "AVoNoXR3K3zsVmdfhVZ4hmEVyj8Bs7yJMvT1xswy1KTCK8CitUdVxQa0bu73mR-lLyBPgn0b2nqCJBrjMARNzw2RufndXOo-8x0lcGXDYz1yk68ehb8ac67Mj5OpimxQEMz0AUCERu4Ht8JzB4ahp9h-_Oix-fhkQ5_AwV32CcIGiOK5w6EwJSm6_kNbcoyii1OtQVZEfNWtpGS8Dze37gvyESvuFr07mCe8dTp7TqDsdsd9XBUBr4udc-y4HouoDm_h_v4Hsml6YZ-_CpjFt4zA_OJZtzNtQvKlSgoD9vG1uKQ8-P23fo84Bpo-WZGDtmJXe2k0ZpjjpWQEwnbbfjRWNTqZkuj0uYcsMi012ly0B63OWHBGP9qTQnJpXn4eAMoLxTsgkV8cjsNXmixwRyF0an2gvpNRRa6qrsMFKiE4C75U0Q7IpGkXSfyeNGL5mygCAnCYsm_AVnaBXHPVN4S2Ic8bUn8ZF_llg5HCJIlC5PoCbPUftT-A8uhpxsz1G6hCluOG5CXpzK4EKsZeYAIvUWNm1JAUy4vjhWpstd_q72VEltdFcWJsm9hz9y8om1LtHhkMAe9IKH5LYDdKYr5zZ_Hn58RSgZMC3sjDzvhS_nDXW7151auJpT_9j3-O_Xk8_Cw_7VXGP4udYGgHQ4mJXtIWCgKQJXdZuBIpFlfZWoyRmBqTdZPVFvh0GyKoqlGfAsm43YIr-d6aTXTAiVRgAgh4Kd8eK42GfNh1RK__KolPpOGgRUoRBm4GOesPWLrXfy_emW9dtAheUPRguHnnB0xXK5alfdgzWfrKZX72oLBVeQjhHiYC0InRiKjvdbi9oIPAySh1ox0"
+}

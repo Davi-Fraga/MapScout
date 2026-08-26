@@ -1,1 +1,0 @@
-"""Persistência de empresas."""

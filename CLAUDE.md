@@ -38,6 +38,7 @@ make api        # uvicorn em dev
 
 ## Fonte de dados
 
+  locationRestriction no searchText aceita apenas rectangle (low/high). circle só é válido em locationBias.
 - **Descoberta:** Google Places API (New), endpoint `places:searchText`.
   Campos corretos: `id`, `displayName.text`, `formattedAddress`, `location`,
   `nationalPhoneNumber`, `websiteUri`, `rating`, `userRatingCount`,
@@ -57,6 +58,7 @@ make api        # uvicorn em dev
 | 1 | `business.site` / `negocio.site` (grátis do Google, descontinuado) | 95 |
 | 2 | link de WhatsApp no lugar do site | 88 |
 | 3 | só rede social ou agregador de links | 85 |
+| 3b | subdomínio gratuito de construtor (wixsite, lovable.app, netlify.app, vercel.app, site123, webnode, weebly, blogspot, wordpress.com) | 80 |
 | 4 | domínio próprio que não resolve (DNS/timeout/4xx/5xx) | 90 |
 | 5 | domínio estacionado ou página vazia | 87 |
 | 6 | página em marketplace de terceiro (iFood, Doctoralia...) | 75 |

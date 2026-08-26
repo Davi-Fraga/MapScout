@@ -1,31 +1,35 @@
 # ROADMAP — MapScout
 
-Fatias verticais. Cada uma termina em um comando que roda e produz resultado visível.
+Blocos verticais. Cada um termina em um comando que roda e produz resultado visível.
 
-- [x] **Fatia 0 — Esqueleto e loop de verificação.** `make check` roda ruff + mypy estrito + pytest e passa verde.
-- [ ] **Fatia 1 — Config e banco.** `config.py` lê env vars, engine SQLite, tabelas iniciais, `api_calls`, funções de repositório. Entrega: um comando cria o banco e lista as tabelas.
-- [ ] **Fatia 2 — Descoberta via Places.** Cliente `places:searchText` com paginação (`pageSize` 20, até 3 páginas via `nextPageToken`), toda chamada registrada em `api_calls`. Entrega: `make coletar` grava empresas reais no banco.
-- [ ] **Fatia 3 — Dedupe e blocklist.** Níveis de dedupe do glossário, tabela `blocklist`, exportação CSV que a consulta. Entrega: coleta repetida não duplica e o export respeita opt-out.
-- [ ] **Fatia 4 — Classificação sem rede.** `presence_level` 0–3 a partir de `websiteUri`, com evidência textual legível. Entrega: relatório por nível.
-- [ ] **Fatia 5 — Enriquecimento HTTP.** Fetch do site respeitando `robots.txt`, máximo 5 páginas por domínio, User-Agent identificável. Níveis 4, 5 e 6.
-- [ ] **Fatia 6 — Qualidade do site.** Níveis 7 e 8 via selectolax (viewport, HTTPS, copyright ≤2020).
-- [ ] **Fatia 7 — Score determinístico.** `base_presença × saúde_do_negócio × ticket_categoria`, tabela de ticket editável em config. Entrega: ranking ordenado.
-- [ ] **Fatia 8 — Interface web.** FastAPI + Jinja2 + HTMX: lista, filtro, ordenação por score, evidência visível. Entrega: `make api`.
-- [ ] **Fatia 9 — Camada de IA.** Saída JSON validada por Pydantic, justificativa obrigatoriamente citando campo real e preenchido, cache por `place_id` + hash. Gera rascunho, nunca envia.
-- [ ] **Fatia 10 — Refresh e agendamento.** `checado_em` > 60 dias re-checa; APScheduler; exportação final.
+- [x] **Bloco 1 — Esqueleto e loop de verificação.** `make check` roda ruff + mypy estrito + pytest e passa verde.
+- [x] **Bloco 2 — Coleta.** Cliente da Places API (`places:searchText`), banco SQLite, repositório e CLI. Entrega: `make coletar` grava empresas reais e registra o custo em `api_calls`.
+- [ ] **Bloco 3 — Dedupe, blocklist e exportação.** Níveis de dedupe do glossário, tabela `blocklist` de opt-out consultada em toda exportação, export CSV.
+- [ ] **Bloco 4 — Enriquecimento e classificação de presença.** Fetch do site respeitando `robots.txt` (máx. 5 páginas, User-Agent identificável) e atribuição de `presence_level` 0–8 com evidência textual.
+- [ ] **Bloco 5 — Score e interface web.** `base_presença × saúde_do_negócio × ticket_categoria` e a tela FastAPI + Jinja2 + HTMX com filtro e ordenação.
+- [ ] **Bloco 6 — Camada de IA e refresh.** Rascunho de abordagem em JSON validado por Pydantic com citação obrigatória de campo preenchido, cache por `place_id` + hash, e re-checagem de `checado_em` > 60 dias via APScheduler.
 
 ## Estado e decisões
 
-### Fatia 0 — concluída em 2026-08-26
+### Bloco 1 — concluído em 2026-08-26
 
-`make check` verde: ruff (E, F, W, I, N, UP, B, SIM, ANN, D, RUF) + mypy `strict` + 1 teste.
+`make check` verde: ruff (E, F, W, I, N, UP, B, SIM, ANN, D, RUF) + mypy `strict` + pytest.
 
-Decisões tomadas:
+- **uv como gerenciador de ambiente.** Não estava na stack do CLAUDE.md. Entrou porque o Python 3.12 exigido não existia na máquina (só 3.13) e o uv resolve pin de interpretador, venv e lock de uma vez. Interpretador travado em 3.12.13.
+- **GNU make instalado** (`ezwinports.make` 4.4.1) para que os quatro comandos do CLAUDE.md fossem literais no Windows.
+- **`ANN` e `D` ligados no ruff.** A regra 4 do CLAUDE.md vira checagem de máquina. Achado de lint não se silencia com `# noqa`: ou se corrige, ou a regra sai do `select` com justificativa.
+- **APScheduler no lugar de `arq`.** O CLAUDE.md aceita os dois; APScheduler roda in-process e não exige Redis.
 
-- **uv como gerenciador de ambiente.** Não estava na stack do CLAUDE.md. Entrou porque o Python 3.12 exigido não existia na máquina (só 3.13) e o uv resolve pin de interpretador, venv e lock de uma vez. Interpretador travado em 3.12.13 via `.python-version` e `requires-python = ">=3.12,<3.13"`.
-- **GNU make instalado** (`ezwinports.make` 4.4.1) para que os quatro comandos do CLAUDE.md fossem literais no Windows, em vez de trocar por um task runner Python.
-- **`ANN` e `D` ligados no ruff.** A regra 4 do CLAUDE.md (type hints + docstring em toda função pública) passa a ser checada por máquina. Achado de lint não se silencia com `# noqa`: ou se corrige, ou a regra sai do `select` com justificativa.
-- **APScheduler no lugar de `arq`.** O CLAUDE.md aceita os dois; APScheduler roda in-process com SQLite e não exige Redis. Já é dependência, será usado na Fatia 10.
-- **`repositories/` é pacote, não módulo**, com um arquivo por tabela (`businesses`, `api_calls`, `blocklist`), para sustentar a regra 5 conforme o domínio cresce.
-- **`cli.py` e `web/app.py` têm stub mínimo.** Sem eles, `make coletar` e `make api` quebrariam e o loop de verificação ficaria decorativo já no primeiro commit.
-- **`.claude/settings.json` nega `.env` e `.env.*`** — inclusive `.env.example`, que por isso foi criado antes do settings. Alterações futuras no template são manuais.
+### Bloco 2 — concluído em 2026-08-26
+
+Coleta ponta a ponta com 23 testes, zero acesso à rede.
+
+- **Layout renomeado** para bater com a especificação do bloco: `places/` virou `sources/places_api.py`; `db.py`, `models.py` e `repositories/` viraram o pacote `db/` com `models.py`, `session.py` e `repo.py`.
+- **Modelos derivados do fixture real**, não do CLAUDE.md. `tests/fixtures/places_searchtext.json` tem 20 lugares; `websiteUri` aparece em 15 deles e é o único campo comprovadamente opcional. Os schemas Pydantic usam `alias` para que o nome real da API (`displayName`, `nationalPhoneNumber`, ...) exista num lugar só e seja auditável.
+- **`types` e `primaryTypeDisplayName` persistidos** mesmo não estando na lista do CLAUDE.md: estão no fixture, e `primaryTypeDisplayName.text` é o rótulo de categoria que o score do Bloco 5 vai precisar.
+- **`locationRestriction` com `rectangle`**, conforme a restrição registrada no CLAUDE.md (`circle` só vale em `locationBias`). A CLI recebe `--raio-m` e `retangulo_do_raio()` circunscreve o círculo. Efeito colateral aceito: os cantos da caixa vão ~41% além do raio pedido.
+- **`--cidade` só compõe o `textQuery`** (`"dentista em Campinas"`), sem coluna no banco — a spec do `Place` é "campos do fixture + `coletado_em` + `checado_em`". O Bloco 3 precisa da cidade para a regra de dedupe "telefone E.164 + mesma cidade" e vai adicionar a coluna via `ALTER TABLE`.
+- **Uma linha em `api_calls` por tentativa HTTP**, não por página. Um 429 seguido de sucesso grava duas linhas — é o que responde "quanto gastei" com honestidade.
+- **Datas gravadas em UTC sem `tzinfo`.** O SQLite descarta timezone; um teste pegou isso na hora. A normalização acontece no repositório (`para_utc_naive`), que é a fronteira de persistência, para que a comparação de `checado_em > 60 dias` do Bloco 6 não estoure com naive vs aware.
+- **Páginas 2 e 3 nos testes reusam o mesmo fixture real**, com o `nextPageToken` removido na última. Remover uma chave não inventa nada, e os `place_id` repetidos exercitam o upsert idempotente de graça.
+- **`argparse` na CLI**, não `typer`/`click`, para não declarar dependência fora da stack.
