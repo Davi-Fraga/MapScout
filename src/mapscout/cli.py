@@ -20,6 +20,8 @@ from mapscout.db.repo import (
     contar_api_calls,
     contar_places,
     criar_job,
+    listar_celulas,
+    listar_todos_places,
     place_de_resposta,
     registrar_api_call,
     upsert_place,
@@ -30,6 +32,7 @@ from mapscout.db.session import (
     criar_tabelas,
     preparar_banco,
 )
+from mapscout.dedupe.lote import ResultadoDedupe, deduplicar
 from mapscout.sources.places_api import ResultadoBusca, buscar_texto, retangulo_do_raio
 
 
@@ -61,7 +64,53 @@ def montar_parser() -> argparse.ArgumentParser:
         help=f"Lado da célula em metros (padrão {PASSO_PADRAO_M:.0f})",
     )
     varredura.add_argument("--cidade", required=True, help="Ex.: Campinas")
+
+    relatorio = subcomandos.add_parser(
+        "relatorio", help="Resumo da varredura e do dedupe sobre a base."
+    )
+    relatorio.add_argument("--categoria", help="Filtra as células por categoria")
+    relatorio.add_argument(
+        "--exemplos", type=int, default=5, help="Quantas fusões listar (padrão 5)"
+    )
     return parser
+
+
+def executar_relatorio(*, categoria: str | None, exemplos: int) -> ResultadoDedupe:
+    """Imprime cobertura do grid e resultado do dedupe, com fusões auditáveis."""
+    engine = criar_engine()
+    preparar_banco(engine)
+
+    with abrir_sessao(engine) as sessao:
+        celulas = listar_celulas(sessao, categoria)
+        places = listar_todos_places(sessao)
+        chamadas = contar_api_calls(sessao)
+
+    dedupe = deduplicar(places)
+    subdivididas = sum(1 for c in celulas if c.saturada)
+
+    print("--- cobertura ---")
+    print(f"células visitadas .......... {len(celulas)}")
+    print(f"células subdivididas ....... {subdivididas}")
+    print(f"chamadas à Places API ...... {chamadas}")
+    print("\n--- base ---")
+    print(f"total bruto coletado ....... {dedupe.total_bruto}")
+    print(f"total após dedupe .......... {dedupe.total_unico}")
+    print(f"fusões ..................... {len(dedupe.fusoes)}")
+    print(f"marcados para revisão ...... {len(dedupe.revisar)}")
+
+    if dedupe.fusoes:
+        print(f"\n--- {min(exemplos, len(dedupe.fusoes))} exemplos de fusão ---")
+        for fusao in dedupe.fusoes[:exemplos]:
+            print(f"{fusao.nome_mantido}  <-  {fusao.nome_duplicado}")
+            print(f"    {fusao.decisao.confianca}: {fusao.decisao.motivo}")
+
+    if dedupe.revisar:
+        print(f"\n--- {min(exemplos, len(dedupe.revisar))} marcados para revisão ---")
+        for par in dedupe.revisar[:exemplos]:
+            print(f"{par.nome_mantido}  ~  {par.nome_duplicado}")
+            print(f"    {par.decisao.motivo}")
+
+    return dedupe
 
 
 def executar_coleta(
@@ -162,6 +211,10 @@ def executar_varredura(
 def main(argv: Sequence[str] | None = None) -> int:
     """Ponto de entrada da CLI."""
     args = montar_parser().parse_args(argv)
+    if args.comando == "relatorio":
+        executar_relatorio(categoria=args.categoria, exemplos=args.exemplos)
+        return 0
+
     if args.comando in {"coletar", "varrer"}:
         try:
             if args.comando == "coletar":

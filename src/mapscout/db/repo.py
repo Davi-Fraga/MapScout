@@ -8,7 +8,10 @@ from datetime import datetime, time
 from sqlmodel import Session, col, func, select
 
 from mapscout.collect.jobs import EstadoJob, GridLog, SearchJob
-from mapscout.db.models import ApiCall, Place, agora_utc, para_utc_naive
+from mapscout.db.models import ApiCall, Blocklist, Place, agora_utc, para_utc_naive
+from mapscout.dominios import e_compartilhado
+from mapscout.normalize.domain import dominio_registravel
+from mapscout.normalize.phone import normalizar_telefone
 from mapscout.sources.places_api import PlaceResposta, RegistroChamada
 
 CAMPOS_PRESERVADOS = frozenset({"place_id", "coletado_em", "checado_em"})
@@ -77,6 +80,12 @@ def listar_places(sessao: Session, limite: int = 5) -> list[Place]:
     return list(sessao.exec(consulta).all())
 
 
+def listar_todos_places(sessao: Session) -> list[Place]:
+    """Lista a base inteira em ordem estável, para o dedupe em lote."""
+    consulta = select(Place).order_by(col(Place.coletado_em), col(Place.place_id))
+    return list(sessao.exec(consulta).all())
+
+
 def contar_places(sessao: Session) -> int:
     """Conta quantos places existem no banco."""
     return int(sessao.exec(select(func.count()).select_from(Place)).one())
@@ -85,6 +94,54 @@ def contar_places(sessao: Session) -> int:
 def contar_api_calls(sessao: Session) -> int:
     """Conta quantas chamadas à Places API foram registradas."""
     return int(sessao.exec(select(func.count()).select_from(ApiCall)).one())
+
+
+def adicionar_blocklist(
+    sessao: Session,
+    *,
+    motivo: str,
+    telefone: str | None = None,
+    dominio: str | None = None,
+    place_id: str | None = None,
+) -> Blocklist:
+    """Registra um opt-out, normalizando telefone e domínio antes de gravar."""
+    e164, _tipo = normalizar_telefone(telefone)
+    linha = Blocklist(
+        telefone_e164=e164,
+        dominio=dominio_registravel(dominio),
+        place_id=place_id,
+        motivo=motivo,
+    )
+    sessao.add(linha)
+    return linha
+
+
+def esta_bloqueado(sessao: Session, place: Place) -> Blocklist | None:
+    """Devolve a linha da blocklist que barra este registro, ou None se liberado."""
+    if place.place_id:
+        por_id = sessao.exec(
+            select(Blocklist).where(col(Blocklist.place_id) == place.place_id)
+        ).first()
+        if por_id is not None:
+            return por_id
+
+    dominio = dominio_registravel(place.website_uri)
+    if dominio and not e_compartilhado(dominio):
+        por_dominio = sessao.exec(
+            select(Blocklist).where(col(Blocklist.dominio) == dominio)
+        ).first()
+        if por_dominio is not None:
+            return por_dominio
+
+    e164, _tipo = normalizar_telefone(place.national_phone_number)
+    if e164:
+        por_telefone = sessao.exec(
+            select(Blocklist).where(col(Blocklist.telefone_e164) == e164)
+        ).first()
+        if por_telefone is not None:
+            return por_telefone
+
+    return None
 
 
 def chamadas_hoje(sessao: Session, agora: datetime | None = None) -> int:

@@ -32,6 +32,37 @@ Fixture real da Places API capturado.
 
 ## Decisões registradas
 
+### Bloco B, Parte 2 — normalização, dedupe e blocklist (26/08/2026)
+
+`make check` verde, 102 testes. Comando novo: `mapscout relatorio`.
+
+- **0800 é tratado como `especial` e excluído da fusão por telefone.** O fixture
+  tem `"0800 160 5555"` (Uniodonto): pela regra "11 dígitos = móvel" viraria celular,
+  e como um 0800 é compartilhado entre unidades, fundiria filiais distintas. Também
+  entram 0300, 0500, 4003, 4004 e 4020.
+- **`wixsite.com` obrigou a lista de domínios compartilhados.** `tldextract` devolve
+  `wixsite.com` como domínio registrável de `redesags.wixsite.com` — dois dentistas
+  diferentes no Wix colidiriam. `dominios.py` reúne social, construtor grátis e
+  marketplace (as listas do CLAUDE.md), e a regra "mesmo domínio funde" os ignora.
+  O mesmo vale para dois perfis distintos na Doctoralia.
+- **A guarda de filial roda antes de domínio e telefone.** O CLAUDE.md lista "mesmo
+  nome, cidades diferentes" por último, mas uma rede compartilha site e 0800 entre
+  unidades — avaliar a guarda depois deixaria a fusão acontecer antes. Há teste
+  específico para isso (`test_filiais_com_o_mesmo_site_ainda_assim_nao_fundem`).
+- **Similaridade por `difflib.SequenceMatcher`**, da stdlib, sem dependência nova.
+  Nome ≥ 0.88; endereço por CEP igual quando houver, senão texto ≥ 0.85.
+- **`Decisao` é dataclass com ação, confiança e motivo** — nunca booleano. O motivo é
+  frase legível ("mesmo domínio próprio (oralclincampinas.com.br)"), no mesmo espírito
+  da regra de evidência do CLAUDE.md.
+- **`tldextract` configurado com `suffix_list_urls=()`**, usando só o snapshot
+  embutido. Sem isso ele tentaria baixar a Public Suffix List e violaria a regra 1.
+- **Blocklist consultada por place_id, domínio próprio e telefone normalizado.**
+  Domínio compartilhado não bloqueia: banir um perfil da Doctoralia não pode banir
+  todos os outros.
+- **Dedupe em lote por chaves de bloqueio**, não O(n²): índice por domínio próprio e
+  por telefone+cidade. Só a marcação para revisão compara par a par, e apenas dentro
+  do mesmo CEP.
+
 ### Bloco B, Parte 1 — grid adaptativo e retomada (26/08/2026)
 
 `make check` verde, 40 testes, nenhum acesso à rede. Comando novo: `mapscout varrer`.

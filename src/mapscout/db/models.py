@@ -42,6 +42,19 @@ class Place(SQLModel, table=True):
     checado_em: datetime = Field(default_factory=agora_utc)
 
 
+class Blocklist(SQLModel, table=True):
+    """Opt-out de LGPD: quem nunca deve ser abordado nem sair numa exportação."""
+
+    __tablename__ = "blocklist"
+
+    id: int | None = Field(default=None, primary_key=True)
+    telefone_e164: str | None = Field(default=None, index=True)
+    dominio: str | None = Field(default=None, index=True)
+    place_id: str | None = Field(default=None, index=True)
+    motivo: str
+    data: datetime = Field(default_factory=agora_utc)
+
+
 class ApiCall(SQLModel, table=True):
     """Uma tentativa de chamada à Places API, para auditoria de custo."""
 
