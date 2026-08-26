@@ -37,6 +37,7 @@ class Place(SQLModel, table=True):
     google_maps_uri: str | None = None
     types: str | None = None
     primary_type_display_name: str | None = None
+    cidade: str | None = None
     coletado_em: datetime = Field(default_factory=agora_utc)
     checado_em: datetime = Field(default_factory=agora_utc)
 

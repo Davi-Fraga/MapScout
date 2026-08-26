@@ -3,20 +3,22 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, time
 
 from sqlmodel import Session, col, func, select
 
+from mapscout.collect.jobs import EstadoJob, GridLog, SearchJob
 from mapscout.db.models import ApiCall, Place, agora_utc, para_utc_naive
 from mapscout.sources.places_api import PlaceResposta, RegistroChamada
 
 CAMPOS_PRESERVADOS = frozenset({"place_id", "coletado_em", "checado_em"})
 
 
-def place_de_resposta(resposta: PlaceResposta) -> Place:
+def place_de_resposta(resposta: PlaceResposta, cidade: str | None = None) -> Place:
     """Converte um lugar da Places API no modelo persistido."""
     return Place(
         place_id=resposta.id,
+        cidade=cidade,
         display_name=resposta.nome.texto,
         formatted_address=resposta.endereco,
         latitude=resposta.localizacao.latitude if resposta.localizacao else None,
@@ -83,3 +85,100 @@ def contar_places(sessao: Session) -> int:
 def contar_api_calls(sessao: Session) -> int:
     """Conta quantas chamadas à Places API foram registradas."""
     return int(sessao.exec(select(func.count()).select_from(ApiCall)).one())
+
+
+def chamadas_hoje(sessao: Session, agora: datetime | None = None) -> int:
+    """Conta as chamadas feitas desde a meia-noite UTC — base do freio de custo."""
+    instante = para_utc_naive(agora) if agora is not None else agora_utc()
+    inicio_do_dia = datetime.combine(instante.date(), time.min)
+    consulta = (
+        select(func.count())
+        .select_from(ApiCall)
+        .where(col(ApiCall.timestamp) >= inicio_do_dia)
+    )
+    return int(sessao.exec(consulta).one())
+
+
+def criar_job(sessao: Session, query: str, cidade: str) -> SearchJob:
+    """Cria uma varredura no estado running e devolve o job já com id."""
+    job = SearchJob(
+        query=query,
+        cidade=cidade,
+        estado=EstadoJob.RUNNING,
+        iniciado_em=agora_utc(),
+    )
+    sessao.add(job)
+    sessao.commit()
+    sessao.refresh(job)
+    return job
+
+
+def obter_job(sessao: Session, job_id: int) -> SearchJob | None:
+    """Busca uma varredura pelo id."""
+    return sessao.get(SearchJob, job_id)
+
+
+def marcar_job(
+    sessao: Session,
+    job_id: int,
+    estado: EstadoJob,
+    *,
+    erro: str | None = None,
+    total_encontrado: int | None = None,
+    total_processado: int | None = None,
+) -> SearchJob | None:
+    """Atualiza estado, totais e o instante de conclusão de uma varredura."""
+    job = sessao.get(SearchJob, job_id)
+    if job is None:
+        return None
+
+    job.estado = estado
+    if erro is not None:
+        job.erro = erro
+    if total_encontrado is not None:
+        job.total_encontrado = total_encontrado
+    if total_processado is not None:
+        job.total_processado = total_processado
+    if estado in {EstadoJob.COMPLETED, EstadoJob.FAILED, EstadoJob.CANCELLED}:
+        job.concluido_em = agora_utc()
+
+    sessao.add(job)
+    return job
+
+
+def celula_ja_executada(sessao: Session, celula_id: str, categoria: str) -> bool:
+    """Diz se a célula já foi consultada para essa categoria em qualquer execução."""
+    return sessao.get(GridLog, (celula_id, categoria)) is not None
+
+
+def registrar_celula(
+    sessao: Session,
+    *,
+    celula_id: str,
+    categoria: str,
+    job_id: int | None,
+    qtd_resultados: int,
+    saturada: bool,
+    nivel: int,
+    agora: datetime | None = None,
+) -> GridLog:
+    """Marca a célula como executada para a categoria, tornando a retomada exata."""
+    linha = GridLog(
+        celula=celula_id,
+        categoria=categoria,
+        job_id=job_id,
+        qtd_resultados=qtd_resultados,
+        saturada=saturada,
+        nivel=nivel,
+        executado_em=para_utc_naive(agora) if agora is not None else agora_utc(),
+    )
+    sessao.add(linha)
+    return linha
+
+
+def listar_celulas(sessao: Session, categoria: str | None = None) -> list[GridLog]:
+    """Lista as células já executadas, opcionalmente filtrando por categoria."""
+    consulta = select(GridLog)
+    if categoria is not None:
+        consulta = consulta.where(col(GridLog.categoria) == categoria)
+    return list(sessao.exec(consulta).all())

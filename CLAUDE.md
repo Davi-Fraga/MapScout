@@ -8,10 +8,16 @@ chance de comprar um site/landing page.
 autenticação de usuários. Se um plano incluir qualquer uma dessas coisas, o
 plano está errado.
 
+## Ambiente
+
+Windows. Terminal PowerShell ou Git Bash. Scripts e comandos do Makefile devem
+funcionar nos dois — não gere script que dependa de utilitário só-Unix sem me
+avisar. Repositório com `.gitattributes` usando `* text=auto eol=lf`.
+
 ## Stack (fixa — não substitua sem me perguntar)
 
-Python 3.12 · FastAPI · SQLModel · SQLite · httpx (async) · selectolax ·
-tldextract · arq/APScheduler · Jinja2 + HTMX · pytest + respx · ruff · mypy
+Python 3.12 · uv · FastAPI · SQLModel · SQLite · httpx (async) · selectolax ·
+tldextract · APScheduler · Jinja2 + HTMX · pytest + respx · ruff · mypy
 
 ## Comandos
 
@@ -32,45 +38,64 @@ make api        # uvicorn em dev
 4. Toda função pública tem type hints e uma docstring de uma linha.
 5. Toda escrita no banco passa por uma função de repositório — sem SQL solto
    espalhado pelos módulos.
-6. Toda chamada à Places API é registrada em `api_calls` (custo é rastreável).
-7. Um commit por fatia concluída. Não commite com `make check` vermelho.
-8. Ao concluir uma fatia, atualize `ROADMAP.md` com o estado e as decisões.
+6. Toda chamada à Places API é registrada em `api_calls`, e o runner para
+   sozinho ao atingir o limite diário definido no config. Custo é rastreável e
+   tem freio no código, não só no console do Google.
+7. Um commit por bloco concluído. Não commite com `make check` vermelho.
+8. Ao concluir um bloco, atualize `ROADMAP.md` com o estado e as decisões.
 
 ## Fonte de dados
 
-  locationRestriction no searchText aceita apenas rectangle (low/high). circle só é válido em locationBias.
 - **Descoberta:** Google Places API (New), endpoint `places:searchText`.
-  Campos corretos: `id`, `displayName.text`, `formattedAddress`, `location`,
-  `nationalPhoneNumber`, `websiteUri`, `rating`, `userRatingCount`,
-  `businessStatus`, `googleMapsUri`. **Não use nomes da API legada.**
-  `pageSize` máximo é 20; até 3 páginas via `nextPageToken`.
+  · Campos corretos: `id`, `displayName.text`, `formattedAddress`, `location`,
+    `nationalPhoneNumber`, `websiteUri`, `rating`, `userRatingCount`,
+    `businessStatus`, `googleMapsUri`. **Não use nomes da API legada.**
+  · `pageSize` máximo é 20; até 3 páginas via `nextPageToken`.
+  · **`locationRestriction` aceita APENAS `rectangle`** (`low`/`high`).
+    `circle` só é válido em `locationBias`. O grid gera retângulos.
+  · `low` é o canto sudoeste, `high` o nordeste. Em latitude negativa (Brasil),
+    `low` é o número mais negativo.
 - **Enriquecimento:** site público da própria empresa. Respeitar `robots.txt`,
   máximo 5 páginas por domínio, User-Agent identificável.
 - **Nunca** raspar MapLeads ou qualquer concorrente.
 
 ## Glossário do domínio
 
-**Níveis de presença digital** (`presence_level`) — quanto menor, maior a oportunidade:
+**Níveis de presença digital** (`presence_level`). A escala é monotônica:
+nível menor = oportunidade maior. Se você precisar inserir um caso novo,
+renumere a tabela inteira em vez de criar sufixo tipo "3b".
 
 | Nível | Significado | Score base |
 |---|---|---|
 | 0 | sem site cadastrado | 100 |
 | 1 | `business.site` / `negocio.site` (grátis do Google, descontinuado) | 95 |
-| 2 | link de WhatsApp no lugar do site | 88 |
-| 3 | só rede social ou agregador de links | 85 |
-| 3b | subdomínio gratuito de construtor (wixsite, lovable.app, netlify.app, vercel.app, site123, webnode, weebly, blogspot, wordpress.com) | 80 |
-| 4 | domínio próprio que não resolve (DNS/timeout/4xx/5xx) | 90 |
-| 5 | domínio estacionado ou página vazia | 87 |
-| 6 | página em marketplace de terceiro (iFood, Doctoralia...) | 75 |
-| 7 | site próprio fraco (sem viewport, sem HTTPS, copyright ≤2020) | 50 |
-| 8 | site próprio saudável | 10 |
+| 2 | domínio próprio que não resolve (DNS/timeout/4xx/5xx) | 90 |
+| 3 | link de WhatsApp no lugar do site | 88 |
+| 4 | domínio estacionado ou página praticamente vazia | 87 |
+| 5 | só rede social ou agregador de links | 85 |
+| 6 | subdomínio gratuito de construtor de site | 80 |
+| 7 | página em marketplace de terceiro | 75 |
+| 8 | site próprio fraco (sem viewport, sem HTTPS, copyright ≤2020) | 50 |
+| 9 | site próprio saudável | 10 |
 
-Todo registro classificado guarda **nível + evidência textual** — a evidência é
-usada na abordagem comercial, então precisa ser uma frase legível por humano.
+Listas de domínios ficam em módulo de constantes separado e editável:
+- **Nível 5 (social):** instagram, facebook, fb.me, linktr.ee, beacons.ai,
+  bio.link, campsite.bio, tiktok, youtube, x.com, twitter
+- **Nível 6 (construtor grátis):** wixsite.com, lovable.app, netlify.app,
+  vercel.app, site123.me, webnode.page, weebly.com, blogspot.com,
+  wordpress.com, github.io, glitch.me, replit.app
+- **Nível 7 (marketplace):** doctoralia.com.br, mechameaqui.com.br, ifood.com.br,
+  booking.com, tripadvisor, olx.com.br, elo7.com.br, mercadolivre.com.br,
+  getninjas.com.br, gympass.com, zenklub.com.br, airbnb.com, rappi.com.br
 
-**Níveis de dedupe:** `place_id` (certo, funde) > domínio registrável (alto,
-funde) > telefone E.164 + mesma cidade (médio, funde) > nome+endereço similares
-(médio, marca para revisão) > mesmo nome em cidades diferentes (**não funde** —
+Todo registro classificado guarda **nível + evidência textual**. A evidência é
+usada na abordagem comercial: precisa ser uma frase que eu mandaria para o
+cliente, não um código interno. Bom: "o link do site no perfil do Google está
+fora do ar (erro 404)". Ruim: "PRESENCE_LEVEL_2_DNS_FAIL".
+
+**Níveis de dedupe:** `place_id` (certeza, funde) > domínio registrável (alta,
+funde) > telefone E.164 + mesma cidade (média, funde) > nome+endereço similares
+(média, marca para revisão) > mesmo nome em cidades diferentes (**não funde** —
 é filial).
 
 **Score determinístico:** `base_presença × saúde_do_negócio × ticket_categoria`.
@@ -87,7 +112,7 @@ Saúde considera `userRatingCount` e `rating`; ticket é tabela editável em con
 
 ## Conformidade
 
-- `blocklist` de opt-out existe desde a Fatia 3 e é consultada em toda exportação.
+- `blocklist` de opt-out existe desde o Bloco B e é consultada em toda exportação.
 - Não coletar dado sensível, não enriquecer com CPF.
 - Não implementar disparo em massa de WhatsApp nem verificação não oficial de número.
 - Places API: `place_id` pode ser armazenado indefinidamente; demais campos
@@ -95,9 +120,12 @@ Saúde considera `userRatingCount` e `rating`; ticket é tabela editável em con
 
 ## Como trabalhar comigo
 
-- Antes de codar uma fatia: mostre o plano, os arquivos a criar e as decisões em
+- Antes de codar um bloco: mostre o plano, os arquivos a criar e as decisões em
   aberto. **Não escreva código até eu aprovar.**
-- Fatias verticais: cada uma termina em um comando que roda e produz resultado
+- Nos pontos marcados `⏸ CHECKPOINT` no prompt, **pare de verdade** e espere
+  minha resposta. Não siga por conta própria mesmo que o próximo passo pareça
+  óbvio.
+- Blocos verticais: cada um termina em um comando que roda e produz resultado
   visível. Nunca "todos os models primeiro".
-- Se uma fatia estiver crescendo demais, pare e proponha dividir.
+- Se um bloco estiver crescendo demais, pare e proponha dividir.
 - Prefira código óbvio a código esperto. Eu vou manter isso sozinho.

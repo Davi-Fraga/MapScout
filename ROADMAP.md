@@ -1,35 +1,106 @@
 # ROADMAP — MapScout
 
-Blocos verticais. Cada um termina em um comando que roda e produz resultado visível.
+## Blocos
 
-- [x] **Bloco 1 — Esqueleto e loop de verificação.** `make check` roda ruff + mypy estrito + pytest e passa verde.
-- [x] **Bloco 2 — Coleta.** Cliente da Places API (`places:searchText`), banco SQLite, repositório e CLI. Entrega: `make coletar` grava empresas reais e registra o custo em `api_calls`.
-- [ ] **Bloco 3 — Dedupe, blocklist e exportação.** Níveis de dedupe do glossário, tabela `blocklist` de opt-out consultada em toda exportação, export CSV.
-- [ ] **Bloco 4 — Enriquecimento e classificação de presença.** Fetch do site respeitando `robots.txt` (máx. 5 páginas, User-Agent identificável) e atribuição de `presence_level` 0–8 com evidência textual.
-- [ ] **Bloco 5 — Score e interface web.** `base_presença × saúde_do_negócio × ticket_categoria` e a tela FastAPI + Jinja2 + HTMX com filtro e ordenação.
-- [ ] **Bloco 6 — Camada de IA e refresh.** Rascunho de abordagem em JSON validado por Pydantic com citação obrigatória de campo preenchido, cache por `place_id` + hash, e re-checagem de `checado_em` > 60 dias via APScheduler.
+- [x] **Bloco A** — Fundação e primeira coleta
+      Esqueleto, loop de verificação (`make check`), cliente Places API,
+      primeira coleta gravando no SQLite.
+- [ ] **Bloco B** — Cobertura real e base limpa
+      Grid adaptativo em retângulos, jobs retomáveis, normalização,
+      dedupe multinível, blocklist.
+- [ ] **Bloco C** — Enriquecimento e diagnóstico
+      Crawler do site da empresa, e-mails, redes sociais, tecnologia,
+      classificador de presença digital (níveis 0–9).
+- [ ] **Bloco D** — Qualificação
+      Filtros, scoring determinístico, exportação, camada de IA ancorada.
+- [ ] **Bloco E** — Automação, API e painel
+      API REST, webhooks, agendador e refresh, painel HTMX.
+- [ ] **Bloco F** — Diferencial CNPJ (opcional)
+      Dados abertos da Receita, matching por CEP + nome, filtro de empresa nova.
 
-## Estado e decisões
+---
 
-### Bloco 1 — concluído em 2026-08-26
+## Estado atual
 
-`make check` verde: ruff (E, F, W, I, N, UP, B, SIM, ANN, D, RUF) + mypy `strict` + pytest.
+**Bloco A concluído.** `make check` verde. Pacote `mapscout` em layout `src/`.
+Fixture real da Places API capturado.
 
-- **uv como gerenciador de ambiente.** Não estava na stack do CLAUDE.md. Entrou porque o Python 3.12 exigido não existia na máquina (só 3.13) e o uv resolve pin de interpretador, venv e lock de uma vez. Interpretador travado em 3.12.13.
-- **GNU make instalado** (`ezwinports.make` 4.4.1) para que os quatro comandos do CLAUDE.md fossem literais no Windows.
-- **`ANN` e `D` ligados no ruff.** A regra 4 do CLAUDE.md vira checagem de máquina. Achado de lint não se silencia com `# noqa`: ou se corrige, ou a regra sai do `select` com justificativa.
-- **APScheduler no lugar de `arq`.** O CLAUDE.md aceita os dois; APScheduler roda in-process e não exige Redis.
+> Preserve aqui a seção "Estado e decisões" que o agente já tinha escrito no
+> Bloco A — ela registra as escolhas de uv, APScheduler, regras do ruff etc.
 
-### Bloco 2 — concluído em 2026-08-26
+---
 
-Coleta ponta a ponta com 23 testes, zero acesso à rede.
+## Decisões registradas
 
-- **Layout renomeado** para bater com a especificação do bloco: `places/` virou `sources/places_api.py`; `db.py`, `models.py` e `repositories/` viraram o pacote `db/` com `models.py`, `session.py` e `repo.py`.
-- **Modelos derivados do fixture real**, não do CLAUDE.md. `tests/fixtures/places_searchtext.json` tem 20 lugares; `websiteUri` aparece em 15 deles e é o único campo comprovadamente opcional. Os schemas Pydantic usam `alias` para que o nome real da API (`displayName`, `nationalPhoneNumber`, ...) exista num lugar só e seja auditável.
-- **`types` e `primaryTypeDisplayName` persistidos** mesmo não estando na lista do CLAUDE.md: estão no fixture, e `primaryTypeDisplayName.text` é o rótulo de categoria que o score do Bloco 5 vai precisar.
-- **`locationRestriction` com `rectangle`**, conforme a restrição registrada no CLAUDE.md (`circle` só vale em `locationBias`). A CLI recebe `--raio-m` e `retangulo_do_raio()` circunscreve o círculo. Efeito colateral aceito: os cantos da caixa vão ~41% além do raio pedido.
-- **`--cidade` só compõe o `textQuery`** (`"dentista em Campinas"`), sem coluna no banco — a spec do `Place` é "campos do fixture + `coletado_em` + `checado_em`". O Bloco 3 precisa da cidade para a regra de dedupe "telefone E.164 + mesma cidade" e vai adicionar a coluna via `ALTER TABLE`.
-- **Uma linha em `api_calls` por tentativa HTTP**, não por página. Um 429 seguido de sucesso grava duas linhas — é o que responde "quanto gastei" com honestidade.
-- **Datas gravadas em UTC sem `tzinfo`.** O SQLite descarta timezone; um teste pegou isso na hora. A normalização acontece no repositório (`para_utc_naive`), que é a fronteira de persistência, para que a comparação de `checado_em > 60 dias` do Bloco 6 não estoure com naive vs aware.
-- **Páginas 2 e 3 nos testes reusam o mesmo fixture real**, com o `nextPageToken` removido na última. Remover uma chave não inventa nada, e os `place_id` repetidos exercitam o upsert idempotente de graça.
-- **`argparse` na CLI**, não `typer`/`click`, para não declarar dependência fora da stack.
+### Bloco B, Parte 1 — grid adaptativo e retomada (26/08/2026)
+
+`make check` verde, 40 testes, nenhum acesso à rede. Comando novo: `mapscout varrer`.
+
+- **Geometria reconciliada.** O prompt pedia célula com "raio = metade da diagonal
+  para garantir sobreposição"; o CLAUDE.md exige `rectangle` e diz que as células
+  encaixam sem sobreposição. A célula é um quadrado e é isso que vai na requisição —
+  quadrados adjacentes ladrilham sem buraco por construção. `raio_m` continua
+  existindo como propriedade derivada, usada para recortar o círculo de varredura e
+  para o piso de 300 m na subdivisão. Nada consulta por círculo.
+- **Freio de custo (regra 6).** `config.teto_chamadas_dia()` (padrão 500,
+  sobrescrevível por `MAPSCOUT_TETO_CHAMADAS_DIA`). O runner consulta
+  `chamadas_hoje()` antes de cada célula e encerra o job em `paused_quota` — sexto
+  estado, além dos cinco do enunciado. Rate limit em `MAPSCOUT_RATE_LIMIT_RPS`.
+- **Retomada por transação-por-célula.** `GridLog` tem PK composta
+  `(celula, categoria)` e é gravado na mesma transação dos places e das `api_calls`.
+  Ou a célula inteira ficou registrada, ou nada ficou — não existe estado
+  intermediário em que se pagou sem registrar.
+- **`Celula.id` determinístico** a partir dos limites arredondados em 6 casas. É o
+  que permite reconhecer a mesma célula entre processos diferentes.
+- **SIGINT cooperativo.** `loop.add_signal_handler` não existe no Windows. A CLI
+  instala `signal.signal` setando um `threading.Event`, checado **entre** células.
+  A célula em curso termina e é gravada antes de sair. Se o Ctrl+C cair no meio de
+  um `await`, o `KeyboardInterrupt` é capturado antes de qualquer gravação — a
+  célula não foi cobrada e volta na retomada.
+- **`db/migrations.garantir_colunas()`.** `create_all` não adiciona coluna a tabela
+  existente. Migração idempotente por `PRAGMA table_info` + `ALTER TABLE ADD COLUMN`,
+  chamada por `preparar_banco()`. Foi o que permitiu adicionar `Place.cidade` sem
+  mandar apagar o banco.
+- **O teste de aceite foi verificado por mutação:** desligando o
+  `celula_ja_executada`, ele reprova. A falha vem da constraint UNIQUE do `GridLog`,
+  que funciona como segunda linha de defesa — gravar duas vezes a mesma célula é
+  estruturalmente impossível, não só improvável.
+
+### Validação inicial da API (26/08/2026)
+
+- **`locationRestriction` no `searchText` aceita apenas `rectangle`** (`low`/`high`).
+  `circle` retorna 400 "Unknown name circle". `circle` só é válido em
+  `locationBias`. Consequência: o grid do Bloco B gera retângulos, não círculos.
+  Isso é melhor para o nosso caso — retângulo restringe de verdade e as células
+  encaixam sem sobreposição.
+- **Fixture real** capturado em `tests/fixtures/places_searchtext.json`:
+  20 dentistas em Campinas centro, com `nextPageToken` presente.
+- **Amostra confirmou a tese:** 10 dos 20 registros são oportunidade real —
+  5 sem site nenhum e 5 com "site" que o filtro binário deixaria passar
+  (Doctoralia, mechameaqui, wixsite.com, lovable.app, Instagram).
+
+### Escala de presença digital renumerada (26/08/2026)
+
+A tabela original não era monotônica: nível 4 tinha score 90 e nível 3 tinha 85,
+contradizendo a regra "nível menor = oportunidade maior". Renumerada de 0 a 9 em
+ordem decrescente de oportunidade. Categoria nova incluída: **subdomínio gratuito
+de construtor de site** (nível 6, score 80) — a pessoa tem site, mas sem domínio
+próprio, sem SEO, sem e-mail profissional e sem controle. Apareceu duas vezes
+numa amostra de 20, com wixsite.com e lovable.app.
+
+### Ambiente (26/08/2026)
+
+- Windows, PowerShell e Git Bash.
+- `.gitattributes` com `* text=auto eol=lf` para evitar diff fantasma de CRLF.
+- `make` instalado via winget; exige reiniciar o terminal para entrar no PATH.
+
+---
+
+## Backlog / ideias não priorizadas
+
+- Fonte complementar: Overpass API (OpenStreetMap), gratuita e sem restrição
+  de armazenamento. Útil para cruzar e validar.
+- Verificação antifalso-positivo: antes de abordar dizendo "vi que você não tem
+  site", buscar o nome do negócio na web. Errar isso queima o contato.
+- Registrar taxa de resposta por nível de presença e por categoria, para
+  recalibrar os pesos do score com dado real em vez de palpite.

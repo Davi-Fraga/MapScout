@@ -1,4 +1,4 @@
-"""Engine SQLite e criação das tabelas."""
+"""Engine SQLite, criação das tabelas e migração de colunas."""
 
 from __future__ import annotations
 
@@ -7,13 +7,22 @@ import os
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
+from mapscout.collect import jobs as _jobs
 from mapscout.db import models as _models
+from mapscout.db.migrations import garantir_colunas
 
 DATABASE_URL_PADRAO = "sqlite:///./mapscout.db"
 
-__all__ = ["abrir_sessao", "criar_engine", "criar_tabelas", "obter_database_url"]
+__all__ = [
+    "abrir_sessao",
+    "criar_engine",
+    "criar_tabelas",
+    "obter_database_url",
+    "preparar_banco",
+]
 
-_ = _models  # garante que as tabelas estejam registradas em SQLModel.metadata
+# Importados só para registrar as tabelas em SQLModel.metadata.
+_ = (_models, _jobs)
 
 
 def obter_database_url() -> str:
@@ -29,6 +38,12 @@ def criar_engine(url: str | None = None) -> Engine:
 def criar_tabelas(engine: Engine) -> None:
     """Cria as tabelas que ainda não existirem no banco."""
     SQLModel.metadata.create_all(engine)
+
+
+def preparar_banco(engine: Engine) -> list[str]:
+    """Cria tabelas faltantes e adiciona colunas novas às que já existem."""
+    criar_tabelas(engine)
+    return garantir_colunas(engine)
 
 
 def abrir_sessao(engine: Engine) -> Session:
