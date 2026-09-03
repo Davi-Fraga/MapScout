@@ -24,20 +24,35 @@ def obter_usuarios_autorizados() -> dict[str, str]:
         # Usuário e senha padrão de primeiro acesso se não configurado
         return {"admin": "admin123"}
 
+    bruto_limpo = bruto.strip().strip("'\"")
+    # Aceita separação por vírgula, ponto e vírgula ou quebras de linha
+    itens = [
+        item.strip()
+        for linha in bruto_limpo.splitlines()
+        for bloco in linha.split(";")
+        for item in bloco.split(",")
+        if item.strip()
+    ]
+
     usuarios: dict[str, str] = {}
-    for par in bruto.split(","):
-        par_limpo = par.strip()
-        if ":" in par_limpo:
-            u, s = par_limpo.split(":", 1)
-            if u.strip() and s.strip():
-                usuarios[u.strip()] = s.strip()
-    return usuarios if usuarios else {"admin": "admin123"}
+    for par in itens:
+        if ":" in par:
+            u, s = par.split(":", 1)
+            u_limpo = u.strip().strip("'\"").lower()
+            s_limpo = s.strip().strip("'\"")
+            if u_limpo and s_limpo:
+                usuarios[u_limpo] = s_limpo
+
+    if not usuarios:
+        usuarios["admin"] = "admin123"
+
+    return usuarios
 
 
 def verificar_credenciais(usuario: str, senha: str) -> bool:
     """Verifica se o usuário e a senha coincidem com algum dos cadastrados."""
     autorizados = obter_usuarios_autorizados()
-    usuario_limpo = usuario.strip()
+    usuario_limpo = usuario.strip().lower()
     if usuario_limpo not in autorizados:
         return False
 
