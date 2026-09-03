@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — MapScout Radar</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: radial-gradient(circle at top, #182232 0%, #0b0f17 100%);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 36px 32px;
+            box-shadow: var(--shadow-lg);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-icon {
+            font-size: 42px;
+            margin-bottom: 8px;
+        }
+        .login-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+        .login-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .login-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #fca5a5;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body class="theme-dark">
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-icon">🎯</div>
+                <h1 class="login-title">MapScout</h1>
+                <p class="login-subtitle">Acesso restrito de inteligência comercial</p>
+            </div>
+
+            {% if erro %}
+            <div class="login-error">
+                <span>⚠️</span>
+                <span>{{ erro }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/login" style="display: flex; flex-direction: column; gap: 18px;">
+                <div class="filter-group">
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-main);">Usuário</label>
+                    <input 
+                        type="text" 
+                        name="usuario" 
+                        class="input-control" 
+                        placeholder="Digite seu usuário..." 
+                        required 
+                        autofocus
+                    >
+                </div>
+
+                <div class="filter-group">
+                    <label style="font-size: 13px; font-weight: 600; color: var(--text-main);">Senha</label>
+                    <input 
+                        type="password" 
+                        name="senha" 
+                        class="input-control" 
+                        placeholder="Digite sua senha..." 
+                        required
+                    >
+                </div>
+
+                <button 
+                    type="submit" 
+                    class="btn btn-primary" 
+                    style="width: 100%; padding: 12px; font-size: 14px; font-weight: 600; margin-top: 6px;"
+                >
+                    Entrar no Sistema →
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 24px; font-size: 12px; color: var(--text-dim);">
+                🔒 Protegido com criptografia HMAC-SHA256
+            </div>
+        </div>
+    </div>
+</body>
+</html>

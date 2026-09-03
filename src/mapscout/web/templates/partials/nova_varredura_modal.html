@@ -1,0 +1,146 @@
+<div class="modal-overlay" onclick="if (event.target === this) fecharModal()">
+    <div class="modal-content" style="max-width: 620px;">
+        <div class="modal-header">
+            <div>
+                <h2 style="font-size: 20px; font-weight: 700; color: #fff;">🚀 Nova Varredura de Mercado</h2>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                    Encontre empresas locais e descubra oportunidades de vendas em segundo plano.
+                </p>
+            </div>
+            <button class="modal-close" onclick="fecharModal()">&times;</button>
+        </div>
+
+        <form 
+            hx-post="/api/jobs/varrer" 
+            hx-target="#job-status-banner" 
+            hx-swap="outerHTML"
+            hx-on::after-request="fecharModal()"
+            style="display: flex; flex-direction: column; gap: 16px; margin-top: 14px;"
+        >
+            <!-- Categoria -->
+            <div class="filter-group">
+                <label style="font-weight: 600; color: #fff; font-size: 13px;">O que você deseja buscar? (Categoria)</label>
+                <input 
+                    type="text" 
+                    id="input-categoria" 
+                    name="categoria" 
+                    placeholder="Ex: dentista, clinica de estetica, advogado, pet shop..." 
+                    class="input-control" 
+                    value="dentista"
+                    required
+                >
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+                    <button type="button" class="btn-preset" onclick="definirCategoria('dentista')">Dentista</button>
+                    <button type="button" class="btn-preset" onclick="definirCategoria('clinica de estetica')">Estética</button>
+                    <button type="button" class="btn-preset" onclick="definirCategoria('advogado')">Advogado</button>
+                    <button type="button" class="btn-preset" onclick="definirCategoria('contabilidade')">Contabilidade</button>
+                    <button type="button" class="btn-preset" onclick="definirCategoria('pet shop')">Pet Shop</button>
+                    <button type="button" class="btn-preset" onclick="definirCategoria('imobiliaria')">Imobiliária</button>
+                </div>
+            </div>
+
+            <!-- Cidade com Autocompletar Inteligente -->
+            <div class="filter-group">
+                <label style="font-weight: 600; color: #fff; font-size: 13px;">Cidade</label>
+                <input 
+                    type="text" 
+                    id="input-cidade" 
+                    name="cidade" 
+                    placeholder="Digite o nome de qualquer cidade (Ex: Campinas, Santos, Sorocaba, Recife...)" 
+                    class="input-control" 
+                    list="datalist-cidades"
+                    value="Campinas"
+                    oninput="aoDigitarCidade(this.value)"
+                    autocomplete="off"
+                    required
+                >
+                <datalist id="datalist-cidades">
+                    {% for c in cidades_brasil %}
+                    <option value="{{ c.nome }}" data-lat="{{ c.lat }}" data-lng="{{ c.lng }}">{{ c.nome }} ({{ c.uf }})</option>
+                    {% endfor %}
+                </datalist>
+
+                <!-- Atalhos rápidos das capitais/cidades mais comuns -->
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+                    <button type="button" class="btn-preset" onclick="definirCidadePreset('Campinas', -22.9056, -47.0608)">Campinas/SP</button>
+                    <button type="button" class="btn-preset" onclick="definirCidadePreset('São Paulo', -23.5505, -46.6333)">São Paulo/SP</button>
+                    <button type="button" class="btn-preset" onclick="definirCidadePreset('Rio de Janeiro', -22.9068, -43.1729)">Rio de Janeiro/RJ</button>
+                    <button type="button" class="btn-preset" onclick="definirCidadePreset('Belo Horizonte', -19.9167, -43.9345)">Belo Horizonte/MG</button>
+                    <button type="button" class="btn-preset" onclick="definirCidadePreset('Curitiba', -25.4284, -49.2733)">Curitiba/PR</button>
+                    <button type="button" class="btn-preset" onclick="definirCidadePreset('Santos', -23.9608, -46.3336)">Santos/SP</button>
+                </div>
+            </div>
+
+            <!-- Raio de Coleta -->
+            <div class="filter-group">
+                <label style="font-weight: 600; color: #fff; font-size: 13px;">Raio de Coleta a partir do Centro (km)</label>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="range" id="range-raio" min="1" max="25" step="1" value="5" class="input-control" style="flex: 1; padding: 0;" oninput="document.getElementById('valor-raio').innerText = this.value + ' km'; document.getElementById('input-raio-km').value = this.value">
+                    <span id="valor-raio" style="font-size: 14px; font-weight: 700; color: var(--accent-blue); min-width: 55px;">5 km</span>
+                    <input type="hidden" id="input-raio-km" name="raio_km" value="5.0">
+                </div>
+            </div>
+
+            <!-- Coordenadas Geográficas (Preenchidas Automaticamente) -->
+            <details style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 14px;">
+                <summary style="font-size: 12px; color: var(--text-muted); cursor: pointer; font-weight: 600;">
+                    📍 Coordenadas Geográficas (Preenchidas Automaticamente)
+                </summary>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div>
+                        <label style="font-size: 11px; color: var(--text-dim);">Latitude</label>
+                        <input type="number" id="input-lat" name="lat" value="-22.9056" step="0.0001" class="input-control" style="padding: 6px 10px; font-size: 12px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; color: var(--text-dim);">Longitude</label>
+                        <input type="number" id="input-lng" name="lng" value="-47.0608" step="0.0001" class="input-control" style="padding: 6px 10px; font-size: 12px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; color: var(--text-dim);">Passo Célula (m)</label>
+                        <input type="number" name="passo_m" value="1000" step="100" class="input-control" style="padding: 6px 10px; font-size: 12px;">
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: 6px;">
+                    ✓ Se deixar vazio ou não alterar, as coordenadas serão calculadas automaticamente pelo nome da cidade.
+                </div>
+            </details>
+
+            <div class="modal-actions" style="margin-top: 6px;">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="btn-iniciar-varredura">
+                    🚀 Iniciar Varredura em Segundo Plano
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function definirCategoria(cat) {
+        document.getElementById('input-categoria').value = cat;
+    }
+
+    function definirCidadePreset(nome, lat, lng) {
+        document.getElementById('input-cidade').value = nome;
+        document.getElementById('input-lat').value = lat;
+        document.getElementById('input-lng').value = lng;
+    }
+
+    function aoDigitarCidade(termo) {
+        const datalist = document.getElementById('datalist-cidades');
+        if (!datalist) return;
+        const opts = datalist.options;
+        const termoNorm = termo.toLowerCase().trim();
+        for (let i = 0; i < opts.length; i++) {
+            if (opts[i].value.toLowerCase() === termoNorm) {
+                const lat = opts[i].getAttribute('data-lat');
+                const lng = opts[i].getAttribute('data-lng');
+                if (lat && lng) {
+                    document.getElementById('input-lat').value = lat;
+                    document.getElementById('input-lng').value = lng;
+                }
+                break;
+            }
+        }
+    }
+</script>

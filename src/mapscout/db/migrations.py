@@ -1,4 +1,4 @@
-"""Migração mínima: adiciona colunas novas a tabelas que já existem."""
+"""Migração mínima: adiciona colunas novas e normaliza dados existentes."""
 
 from __future__ import annotations
 
@@ -24,5 +24,15 @@ def garantir_colunas(engine: Engine) -> list[str]:
             with engine.begin() as conexao:
                 conexao.execute(text(comando))
             adicionadas.append(f"{nome_tabela}.{coluna.name}")
+
+    if inspetor.has_table("places"):
+        with engine.begin() as conexao:
+            conexao.execute(
+                text(
+                    "UPDATE places SET presence_level = 0 "
+                    "WHERE (website_uri IS NULL OR website_uri = '') "
+                    "AND presence_level IS NULL"
+                )
+            )
 
     return adicionadas

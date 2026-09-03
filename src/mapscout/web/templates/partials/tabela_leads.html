@@ -1,0 +1,130 @@
+{% if leads %}
+<table class="leads-table">
+    <thead>
+        <tr>
+            <th>Empresa</th>
+            <th>Localização</th>
+            <th>Presença Digital</th>
+            <th>Reputação Google</th>
+            <th>Score</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in leads %}
+        {% set p = item.place %}
+        {% set score = item.score %}
+        {% set nivel = p.presence_level if p.presence_level is not none else 0 %}
+        <tr class="lead-row" id="lead-row-{{ p.place_id }}">
+            <td>
+                <div class="company-title">{{ p.display_name }}</div>
+                <div class="company-sub">
+                    {% if p.website_uri %}
+                        <a href="{{ p.website_uri }}" target="_blank" rel="noopener" style="color: var(--text-dim); text-decoration: none;">
+                            🔗 {{ p.website_uri | truncate(35) }}
+                        </a>
+                    {% else %}
+                        <span style="color: var(--accent-amber);">⚠️ Sem site cadastrado</span>
+                    {% endif %}
+                </div>
+            </td>
+            <td>
+                <div>{{ p.cidade or "—" }}</div>
+                <div style="font-size: 12px; color: var(--text-dim);">
+                    {{ p.national_phone_number or "Sem telefone" }}
+                </div>
+            </td>
+            <td>
+                <span class="badge badge-level-{{ nivel }}">
+                    {% if nivel == 0 %}🚫 0 - Sem Site
+                    {% elif nivel == 1 %}⚠️ 1 - Google Site
+                    {% elif nivel == 2 %}🔴 2 - Fora do Ar
+                    {% elif nivel == 3 %}💬 3 - Link WhatsApp
+                    {% elif nivel == 4 %}🚧 4 - Domínio Vazio
+                    {% elif nivel == 5 %}📸 5 - Rede Social
+                    {% elif nivel == 6 %}🏗️ 6 - Construtor Grátis
+                    {% elif nivel == 7 %}🏪 7 - Marketplace
+                    {% elif nivel == 8 %}⚡ 8 - Site Fraco
+                    {% else %}✅ 9 - Saudável
+                    {% endif %}
+                </span>
+            </td>
+            <td>
+                {% if p.rating %}
+                    <span class="rating-pill">⭐ {{ p.rating }}</span>
+                    <span class="rating-count">({{ p.user_rating_count or 0 }})</span>
+                {% else %}
+                    <span style="color: var(--text-dim); font-size: 12px;">Sem reviews</span>
+                {% endif %}
+            </td>
+            <td>
+                <span class="score-badge {% if score >= 100 %}score-high{% elif score >= 60 %}score-medium{% else %}score-low{% endif %}">
+                    {{ score }}
+                </span>
+            </td>
+            <td>
+                <select 
+                    class="select-control select-sm" 
+                    style="padding: 4px 8px; font-size: 12px; width: auto;"
+                    hx-post="/api/lead/{{ p.place_id }}/status"
+                    hx-trigger="change"
+                    hx-target="#lead-row-{{ p.place_id }}"
+                    hx-swap="outerHTML"
+                    name="novo_status"
+                >
+                    <option value="novo" {% if p.status_lead == 'novo' %}selected{% endif %}>Novo</option>
+                    <option value="contatado" {% if p.status_lead == 'contatado' %}selected{% endif %}>Contatado</option>
+                    <option value="em_conversa" {% if p.status_lead == 'em_conversa' %}selected{% endif %}>Em Conversa</option>
+                    <option value="proposta" {% if p.status_lead == 'proposta' %}selected{% endif %}>Proposta</option>
+                    <option value="fechado" {% if p.status_lead == 'fechado' %}selected{% endif %}>Fechado</option>
+                    <option value="perdido" {% if p.status_lead == 'perdido' %}selected{% endif %}>Perdido</option>
+                </select>
+            </td>
+            <td>
+                <div style="display: flex; gap: 8px;">
+                    <button 
+                        class="btn btn-primary btn-sm"
+                        hx-get="/partials/lead/{{ p.place_id }}"
+                        hx-target="#modal-container"
+                        hx-swap="innerHTML"
+                    >
+                        Auditoria & Pitch
+                    </button>
+                    {% if p.national_phone_number %}
+                    <a 
+                        href="{{ item.link_whatsapp }}" 
+                        target="_blank" 
+                        rel="noopener"
+                        class="btn btn-whatsapp btn-sm"
+                        title="Abrir WhatsApp direto"
+                    >
+                        WhatsApp
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div style="padding: 48px 24px; text-align: center; color: var(--text-muted);">
+    <div style="font-size: 44px; margin-bottom: 12px;">🎯</div>
+    <div style="font-size: 18px; font-weight: 700; color: #fff;">Sua base de leads está pronta para a primeira coleta!</div>
+    <div style="font-size: 14px; margin-top: 6px; max-width: 500px; margin-left: auto; margin-right: auto;">
+        Escolha uma categoria de negócios (ex: Dentistas, Clínicas, Advogados) e uma cidade para mapear as empresas e seus sites.
+    </div>
+    <div style="margin-top: 20px;">
+        <button 
+            class="btn btn-primary"
+            hx-get="/partials/modal/varrer"
+            hx-target="#modal-container"
+            hx-swap="innerHTML"
+            style="padding: 10px 22px; font-size: 14px;"
+        >
+            🚀 Iniciar Minha Primeira Varredura
+        </button>
+    </div>
+</div>
+{% endif %}

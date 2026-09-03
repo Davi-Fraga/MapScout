@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: mapscout
+    env: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /login
+    autoDeploy: true
+    envVars:
+      - key: MAPSCOUT_USERS
+        sync: false
+      - key: MAPSCOUT_SECRET_KEY
+        generateValue: true
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

@@ -38,6 +38,20 @@ class Place(SQLModel, table=True):
     types: str | None = None
     primary_type_display_name: str | None = None
     cidade: str | None = None
+    presence_level: int | None = Field(default=None, index=True)
+    presence_evidence: str | None = None
+    website_status_code: int | None = None
+    has_ssl: bool | None = None
+    has_mobile_viewport: bool | None = None
+    copyright_year: int | None = None
+    emails: str | None = None
+    instagram_url: str | None = None
+    facebook_url: str | None = None
+    whatsapp_url: str | None = None
+    tech_detected: str | None = None
+    enriquecido_em: datetime | None = None
+    score: float | None = Field(default=None, index=True)
+    status_lead: str = Field(default="novo", index=True)
     coletado_em: datetime = Field(default_factory=agora_utc)
     checado_em: datetime = Field(default_factory=agora_utc)
 
@@ -66,3 +80,15 @@ class ApiCall(SQLModel, table=True):
     qtd_resultados: int
     field_mask: str
     status_code: int
+
+
+class AiCache(SQLModel, table=True):
+    """Cache de respostas da IA para evitar reprocessamento e gasto com tokens."""
+
+    __tablename__ = "ai_cache"
+
+    id: int | None = Field(default=None, primary_key=True)
+    place_id: str = Field(index=True)
+    hash_entrada: str = Field(index=True)
+    resposta_json: str
+    criado_em: datetime = Field(default_factory=agora_utc)

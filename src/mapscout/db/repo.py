@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 from sqlmodel import Session, col, func, select
 
@@ -19,6 +19,7 @@ CAMPOS_PRESERVADOS = frozenset({"place_id", "coletado_em", "checado_em"})
 
 def place_de_resposta(resposta: PlaceResposta, cidade: str | None = None) -> Place:
     """Converte um lugar da Places API no modelo persistido."""
+    nivel_inicial = 0 if not resposta.site or not resposta.site.strip() else None
     return Place(
         place_id=resposta.id,
         cidade=cidade,
@@ -28,6 +29,7 @@ def place_de_resposta(resposta: PlaceResposta, cidade: str | None = None) -> Pla
         longitude=resposta.localizacao.longitude if resposta.localizacao else None,
         national_phone_number=resposta.telefone,
         website_uri=resposta.site,
+        presence_level=nivel_inicial,
         rating=resposta.nota,
         user_rating_count=resposta.qtd_avaliacoes,
         business_status=resposta.status,
@@ -238,4 +240,67 @@ def listar_celulas(sessao: Session, categoria: str | None = None) -> list[GridLo
     consulta = select(GridLog)
     if categoria is not None:
         consulta = consulta.where(col(GridLog.categoria) == categoria)
+    return list(sessao.exec(consulta).all())
+
+
+def listar_places_para_enriquecer(
+    sessao: Session, *, forcar: bool = False, limite: int | None = None
+) -> list[Place]:
+    """Lista places que ainda não foram enriquecidos ou todos se forcar for True."""
+    consulta = select(Place).order_by(col(Place.coletado_em))
+    if not forcar:
+        consulta = consulta.where(col(Place.enriquecido_em).is_(None))
+    if limite is not None:
+        consulta = consulta.limit(limite)
+    return list(sessao.exec(consulta).all())
+
+
+def salvar_place_enriquecido(sessao: Session, place: Place) -> None:
+    """Atualiza os campos de diagnóstico e enriquecimento de um Place no banco."""
+    sessao.add(place)
+    sessao.commit()
+
+
+def contar_pendentes_enriquecimento(sessao: Session) -> int:
+    """Conta quantos lugares estão cadastrados mas ainda não foram enriquecidos."""
+    consulta = (
+        select(func.count())
+        .select_from(Place)
+        .where(col(Place.enriquecido_em).is_(None))
+    )
+    return int(sessao.exec(consulta).one())
+
+
+def listar_places_para_rechecar(
+    sessao: Session, *, dias: int = 60, limite: int | None = None
+) -> list[Place]:
+    """Lista lugares checados há mais de X dias para conformidade com a Places API."""
+    limite_data = agora_utc() - timedelta(days=dias)
+    consulta = (
+        select(Place)
+        .where(col(Place.checado_em) < limite_data)
+        .order_by(col(Place.checado_em))
+    )
+    if limite is not None:
+        consulta = consulta.limit(limite)
+    return list(sessao.exec(consulta).all())
+
+
+def listar_places_por_nivel(
+    sessao: Session, *, nivel: int, limite: int | None = None
+) -> list[Place]:
+    """Lista lugares com um determinado nível de presença digital."""
+    consulta = (
+        select(Place)
+        .where(col(Place.presence_level) == nivel)
+        .order_by(col(Place.enriquecido_em).desc())
+    )
+    if limite is not None:
+        consulta = consulta.limit(limite)
+    return list(sessao.exec(consulta).all())
+
+
+def listar_jobs(sessao: Session, limite: int = 10) -> list[SearchJob]:
+    """Lista as varreduras mais recentes registradas no sistema."""
+    consulta = select(SearchJob).order_by(col(SearchJob.id).desc()).limit(limite)
     return list(sessao.exec(consulta).all())

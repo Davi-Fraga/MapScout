@@ -1,0 +1,93 @@
+<div class="modal-overlay" onclick="if (event.target === this) fecharModal()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2 style="font-size: 20px; font-weight: 700; color: #fff;">{{ place.display_name }}</h2>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                    📍 {{ place.cidade or "Cidade não informada" }} • 📞 {{ place.national_phone_number or "Sem telefone" }}
+                </p>
+            </div>
+            <button class="modal-close" onclick="fecharModal()">&times;</button>
+        </div>
+
+        <div class="diagnostic-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase;">
+                    🔍 Diagnóstico de Presença Digital (Nível {{ place.presence_level if place.presence_level is not none else 0 }})
+                </span>
+                <span class="badge badge-level-{{ place.presence_level if place.presence_level is not none else 0 }}">
+                    Score de Oportunidade: {{ score }}
+                </span>
+            </div>
+            <p style="font-size: 14px; color: #fff; font-weight: 500;">
+                {{ place.presence_evidence or "Sem diagnóstico disponível." }}
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 14px; font-size: 13px; color: var(--text-muted);">
+                <div><strong>Site Atual:</strong> {{ place.website_uri or "Nenhum" }}</div>
+                <div><strong>Mobile Viewport:</strong> {% if place.has_mobile_viewport %}✅ Sim{% elif place.has_mobile_viewport is false %}❌ Não{% else %}—{% endif %}</div>
+                <div><strong>Segurança SSL:</strong> {% if place.has_ssl %}✅ Sim{% elif place.has_ssl is false %}❌ Inseguro (HTTP){% else %}—{% endif %}</div>
+                <div><strong>Última Atualização:</strong> {{ place.copyright_year or "—" }}</div>
+                <div><strong>E-mails:</strong> {{ place.emails or "Nenhum" }}</div>
+                <div><strong>Instagram:</strong> {% if place.instagram_url %}<a href="{{ place.instagram_url }}" target="_blank" style="color: var(--accent-blue);">Abrir Perfil</a>{% else %}—{% endif %}</div>
+            </div>
+        </div>
+
+        <div class="pitch-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-size: 12px; font-weight: 700; color: var(--accent-green); text-transform: uppercase;">
+                    💬 Rascunho de Abordagem para WhatsApp (IA Ancorada)
+                </label>
+                <button 
+                    class="btn btn-secondary btn-sm"
+                    onclick="copiarTexto('pitch-whatsapp-text', this)"
+                >
+                    📋 Copiar Mensagem
+                </button>
+            </div>
+            <textarea id="pitch-whatsapp-text" class="pitch-textarea" readonly>{{ abordagem.mensagem_whatsapp }}</textarea>
+        </div>
+
+        {% if abordagem.mensagem_email %}
+        <div class="pitch-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-size: 12px; font-weight: 700; color: var(--accent-purple); text-transform: uppercase;">
+                    ✉️ Rascunho de E-mail Consultivo
+                </label>
+                <button 
+                    class="btn btn-secondary btn-sm"
+                    onclick="copiarTexto('pitch-email-text', this)"
+                >
+                    📋 Copiar E-mail
+                </button>
+            </div>
+            <textarea id="pitch-email-text" class="pitch-textarea" readonly>{{ abordagem.mensagem_email }}</textarea>
+        </div>
+        {% endif %}
+
+        <div class="modal-actions">
+            <button 
+                class="btn btn-secondary"
+                hx-post="/api/lead/{{ place.place_id }}/block"
+                hx-confirm="Tem certeza que deseja adicionar este lead à Blocklist (opt-out definitivo)?"
+                hx-target="#lead-row-{{ place.place_id }}"
+                hx-swap="outerHTML"
+                onclick="fecharModal()"
+                style="color: var(--accent-red); margin-right: auto;"
+            >
+                🚫 Bloquear Lead (Opt-out)
+            </button>
+            <button class="btn btn-secondary" onclick="fecharModal()">Fechar</button>
+            {% if link_whatsapp %}
+            <a 
+                href="{{ link_whatsapp }}" 
+                target="_blank" 
+                rel="noopener"
+                class="btn btn-whatsapp"
+            >
+                🚀 Abrir no WhatsApp Web
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>

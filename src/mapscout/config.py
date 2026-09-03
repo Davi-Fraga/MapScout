@@ -41,3 +41,34 @@ def rate_limit_rps() -> float:
 def teto_chamadas_dia() -> int:
     """Teto diário de chamadas à Places API — o freio de custo exigido pela regra 6."""
     return _int_do_ambiente("MAPSCOUT_TETO_CHAMADAS_DIA", TETO_CHAMADAS_DIA_PADRAO)
+
+
+TICKETS_CATEGORIA: dict[str, float] = {
+    "dentista": 1.25,
+    "odonto": 1.25,
+    "medico": 1.30,
+    "clinica": 1.30,
+    "advogado": 1.30,
+    "advocacia": 1.30,
+    "engenharia": 1.25,
+    "arquiteto": 1.25,
+    "arquitetura": 1.25,
+    "contabilidade": 1.20,
+    "imobiliaria": 1.20,
+    "estetica": 1.15,
+    "salao": 1.05,
+    "restaurante": 1.00,
+    "pizzaria": 1.00,
+    "oficina": 1.05,
+}
+
+
+def multiplicador_ticket(categoria: str | None) -> float:
+    """Devolve o peso estimado de ticket médio para a categoria da empresa."""
+    if not categoria:
+        return 1.0
+    cat_lower = categoria.lower().strip()
+    for chave, valor in TICKETS_CATEGORIA.items():
+        if chave in cat_lower:
+            return valor
+    return 1.0

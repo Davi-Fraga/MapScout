@@ -7,13 +7,13 @@ lint:
 	uv run ruff format --check .
 
 types:
-	uv run mypy
+	uv run python -m mypy
 
 test:
-	uv run pytest -q
+	uv run python -m pytest -q
 
 coletar:
-	uv run mapscout coletar $(ARGS)
+	uv run python -m mapscout.cli coletar $(ARGS)
 
 api:
-	uv run uvicorn mapscout.web.app:app --reload
+	uv run python -m uvicorn mapscout.web.app:app --reload --host 127.0.0.1 --port 8000

@@ -1,0 +1,122 @@
+<div id="job-status-banner" 
+     {% if task.ativa %}
+        hx-get="/partials/jobs/status" 
+        hx-trigger="every 1s" 
+        hx-swap="outerHTML"
+     {% endif %}
+     class="job-banner-container"
+>
+    {% if task.status == 'running' %}
+    <div class="job-card job-running">
+        <div class="job-header">
+            <div class="job-title-wrapper">
+                <span class="pulse-indicator"></span>
+                <strong style="color: #fff; font-size: 14px;">
+                    {% if task.tipo == 'varredura' %}🚀 Varredura em Andamento{% else %}⚡ Diagnóstico em Andamento{% endif %}
+                </strong>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 13px; font-weight: 700; color: var(--accent-blue);">
+                    {{ task.porcentagem }}%
+                </span>
+                <button 
+                    class="btn btn-secondary btn-sm"
+                    hx-post="/api/jobs/cancelar"
+                    hx-swap="none"
+                    style="color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);"
+                >
+                    ✕ Parar
+                </button>
+            </div>
+        </div>
+        
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: {{ task.porcentagem }}%;"></div>
+        </div>
+
+        <div class="job-footer">
+            <span class="job-message">{{ task.mensagem }}</span>
+            <span class="job-counter">{{ task.progresso_atual }} / {{ task.total }}</span>
+        </div>
+    </div>
+
+    {% elif task.status == 'completed' %}
+    <div class="job-card job-completed">
+        <div class="job-header">
+            <div class="job-title-wrapper">
+                <span style="font-size: 16px;">✅</span>
+                <strong style="color: #fff; font-size: 14px;">Tarefa Concluída com Sucesso!</strong>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button 
+                    class="btn btn-primary btn-sm"
+                    hx-get="/partials/leads"
+                    hx-target="#leads-tabela-container"
+                    hx-swap="innerHTML"
+                    onclick="document.getElementById('job-status-banner').innerHTML = ''"
+                >
+                    🔄 Atualizar Tabela
+                </button>
+                <button 
+                    class="btn btn-secondary btn-sm"
+                    onclick="document.getElementById('job-status-banner').innerHTML = ''"
+                >
+                    ✕
+                </button>
+            </div>
+        </div>
+        <p class="job-message" style="margin-top: 6px;">{{ task.mensagem }}</p>
+    </div>
+
+    {% elif task.status == 'cancelled' %}
+    <div class="job-card job-warning">
+        <div class="job-header">
+            <div class="job-title-wrapper">
+                <span style="font-size: 16px;">⚠️</span>
+                <strong style="color: #fff; font-size: 14px;">Tarefa Interrompida</strong>
+            </div>
+            <button 
+                class="btn btn-secondary btn-sm"
+                onclick="document.getElementById('job-status-banner').innerHTML = ''"
+            >
+                ✕
+            </button>
+        </div>
+        <p class="job-message" style="margin-top: 6px;">{{ task.mensagem }}</p>
+    </div>
+
+    {% elif task.status == 'paused_quota' %}
+    <div class="job-card job-warning">
+        <div class="job-header">
+            <div class="job-title-wrapper">
+                <span style="font-size: 16px;">🛑</span>
+                <strong style="color: #fff; font-size: 14px;">Teto Diário Atingido</strong>
+            </div>
+            <button 
+                class="btn btn-secondary btn-sm"
+                onclick="document.getElementById('job-status-banner').innerHTML = ''"
+            >
+                ✕
+            </button>
+        </div>
+        <p class="job-message" style="margin-top: 6px;">{{ task.mensagem }}</p>
+    </div>
+
+    {% elif task.status == 'failed' %}
+    <div class="job-card job-danger">
+        <div class="job-header">
+            <div class="job-title-wrapper">
+                <span style="font-size: 16px;">❌</span>
+                <strong style="color: #fff; font-size: 14px;">Falha na Execução</strong>
+            </div>
+            <button 
+                class="btn btn-secondary btn-sm"
+                onclick="document.getElementById('job-status-banner').innerHTML = ''"
+            >
+                ✕
+            </button>
+        </div>
+        <p class="job-message" style="margin-top: 6px;">{{ task.mensagem }}</p>
+    </div>
+    {% endif %}
+</div>

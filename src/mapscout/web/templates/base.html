@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MapScout — Prospecção de Vendas de Sites{% endblock %}</title>
+    <!-- HTMX para interatividade sem JavaScript complexo -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark">
+    <header class="navbar">
+        <div class="container nav-content">
+            <div class="brand">
+                <span class="brand-icon">🎯</span>
+                <div class="brand-text">
+                    <span class="brand-title">MapScout</span>
+                    <span class="brand-badge">Radar de Oportunidades</span>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-item active">Leads & Oportunidades</a>
+                <button 
+                    class="btn btn-primary btn-sm"
+                    hx-get="/partials/modal/varrer"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML"
+                >
+                    🚀 Nova Varredura
+                </button>
+                <button 
+                    class="btn btn-secondary btn-sm"
+                    hx-post="/api/jobs/enriquecer"
+                    hx-target="#job-status-banner"
+                    hx-swap="outerHTML"
+                >
+                    ⚡ Enriquecer
+                </button>
+                <button 
+                    class="btn btn-secondary btn-sm"
+                    hx-get="/partials/automacoes"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML"
+                >
+                    ⏱️ Automações
+                </button>
+                <a href="/exportar" class="btn btn-secondary btn-sm" download>
+                    📥 CSV
+                </a>
+                <div style="display: flex; align-items: center; gap: 10px; margin-left: 8px; padding-left: 12px; border-left: 1px solid var(--border-subtle);">
+                    <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">
+                        👤 {{ request.state.usuario if request.state and request.state.usuario else "Conectado" }}
+                    </span>
+                    <a href="/logout" class="btn btn-secondary btn-sm" style="color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);" title="Encerrar sessão">
+                        Sair
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <div id="job-status-banner">
+            {% if task %}
+                {% include "partials/job_status.html" %}
+            {% endif %}
+        </div>
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="modal-container"></div>
+
+    <script>
+        function copiarTexto(elementId, btn) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            navigator.clipboard.writeText(el.value || el.innerText).then(() => {
+                const textoOriginal = btn.innerText;
+                btn.innerText = "✓ Copiado!";
+                btn.classList.add("btn-success");
+                setTimeout(() => {
+                    btn.innerText = textoOriginal;
+                    btn.classList.remove("btn-success");
+                }, 2000);
+            });
+        }
+
+        function fecharModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) modal.remove();
+        }
+    </script>
+</body>
+</html>

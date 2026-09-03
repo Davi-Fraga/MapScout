@@ -21,9 +21,11 @@ from mapscout.db.repo import (
     contar_places,
     criar_job,
     listar_celulas,
+    listar_places_para_enriquecer,
     listar_todos_places,
     place_de_resposta,
     registrar_api_call,
+    salvar_place_enriquecido,
     upsert_place,
 )
 from mapscout.db.session import (
@@ -33,6 +35,8 @@ from mapscout.db.session import (
     preparar_banco,
 )
 from mapscout.dedupe.lote import ResultadoDedupe, deduplicar
+from mapscout.enrichment.service import enriquecer_lote
+from mapscout.export import exportar_leads_qualificados
 from mapscout.sources.places_api import ResultadoBusca, buscar_texto, retangulo_do_raio
 
 
@@ -71,6 +75,32 @@ def montar_parser() -> argparse.ArgumentParser:
     relatorio.add_argument("--categoria", help="Filtra as células por categoria")
     relatorio.add_argument(
         "--exemplos", type=int, default=5, help="Quantas fusões listar (padrão 5)"
+    )
+
+    enriquecer = subcomandos.add_parser(
+        "enriquecer", help="Diagnostica a presença digital e enriquece os sites."
+    )
+    enriquecer.add_argument(
+        "--limite", type=int, default=None, help="Limite de lugares a enriquecer"
+    )
+    enriquecer.add_argument(
+        "--forcar", action="store_true", help="Re-enriquece mesmo os já processados"
+    )
+    enriquecer.add_argument(
+        "--concorrencia", type=int, default=5, help="Concorrência paralela (padrão 5)"
+    )
+    exportar = subcomandos.add_parser(
+        "exportar", help="Exporta leads qualificados para CSV/JSON com abordagem."
+    )
+    exportar.add_argument(
+        "--arquivo", default="leads.csv", help="Caminho do arquivo de saída"
+    )
+    exportar.add_argument(
+        "--min-score", type=float, default=0.0, help="Score mínimo de oportunidade"
+    )
+    exportar.add_argument("--cidade", default=None, help="Filtrar por cidade")
+    exportar.add_argument(
+        "--formato", choices=["csv", "json"], default="csv", help="Formato do arquivo"
     )
     return parser
 
@@ -208,11 +238,113 @@ def executar_varredura(
     return resultado
 
 
+def executar_enriquecimento(
+    *, limite: int | None, forcar: bool, concorrencia: int
+) -> int:
+    """Diagnostica a presença digital e enriquece os sites das empresas cadastradas."""
+    engine = criar_engine()
+    preparar_banco(engine)
+
+    with abrir_sessao(engine) as sessao:
+        places = listar_places_para_enriquecer(sessao, forcar=forcar, limite=limite)
+
+    if not places:
+        print("Nenhum lead pendente de enriquecimento.")
+        return 0
+
+    print(f"Enriquecendo {len(places)} empresas (concorrência: {concorrencia})...")
+    processados = asyncio.run(enriquecer_lote(places, concorrencia=concorrencia))
+
+    with abrir_sessao(engine) as sessao:
+        for p in processados:
+            salvar_place_enriquecido(sessao, p)
+
+    por_nivel: dict[int, int] = {}
+    com_email = 0
+    com_whats = 0
+    com_insta = 0
+    for p in processados:
+        nv = p.presence_level if p.presence_level is not None else -1
+        por_nivel[nv] = por_nivel.get(nv, 0) + 1
+        if p.emails:
+            com_email += 1
+        if p.whatsapp_url:
+            com_whats += 1
+        if p.instagram_url:
+            com_insta += 1
+
+    print("\n--- diagnóstico de presença digital ---")
+    nomes_nivel = {
+        0: "0 - sem site cadastrado",
+        1: "1 - business.site (Google, descontinuado)",
+        2: "2 - domínio próprio fora do ar (erro HTTP/DNS)",
+        3: "3 - link de WhatsApp como site",
+        4: "4 - domínio estacionado / página vazia",
+        5: "5 - rede social / agregador (Instagram/Linktree)",
+        6: "6 - construtor grátis (Wix/Blogspot/etc)",
+        7: "7 - marketplace terceiro (Doctoralia/iFood)",
+        8: "8 - site próprio fraco (sem mobile/sem SSL/antigo)",
+        9: "9 - site próprio saudável",
+    }
+    for nv in range(10):
+        if nv in por_nivel:
+            print(f"  {nomes_nivel.get(nv, str(nv))}: {por_nivel[nv]}")
+
+    print("\n--- contatos enriquecidos ---")
+    print(f"  e-mails encontrados: {com_email}")
+    print(f"  links de WhatsApp direto: {com_whats}")
+    print(f"  perfis de Instagram: {com_insta}")
+    print(f"\nTotal enriquecido: {len(processados)} leads salvos.")
+    return len(processados)
+
+
+def executar_exportacao(
+    *,
+    arquivo: str,
+    min_score: float,
+    cidade: str | None,
+    formato: str,
+) -> int:
+    """Exporta leads qualificados para arquivo com links de WhatsApp."""
+    engine = criar_engine()
+    preparar_banco(engine)
+
+    with abrir_sessao(engine) as sessao:
+        total = exportar_leads_qualificados(
+            sessao,
+            arquivo,
+            min_score=min_score,
+            cidade=cidade,
+            formato=formato,
+        )
+
+    print(
+        f"Exportados {total} leads qualificados para '{arquivo}' "
+        f"(score >= {min_score})."
+    )
+    return total
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Ponto de entrada da CLI."""
     args = montar_parser().parse_args(argv)
     if args.comando == "relatorio":
         executar_relatorio(categoria=args.categoria, exemplos=args.exemplos)
+        return 0
+
+    if args.comando == "enriquecer":
+        executar_enriquecimento(
+            limite=args.limite, forcar=args.forcar, concorrencia=args.concorrencia
+        )
+        return 0
+
+    if args.comando == "exportar":
+        executar_exportacao(
+            arquivo=args.arquivo,
+            min_score=args.min_score,
+            cidade=args.cidade,
+            formato=args.formato,
+        )
         return 0
 
     if args.comando in {"coletar", "varrer"}:

@@ -1,0 +1,64 @@
+<div class="modal-overlay" onclick="if (event.target === this) fecharModal()">
+    <div class="modal-content" style="max-width: 680px;">
+        <div class="modal-header">
+            <div>
+                <h2 style="font-size: 20px; font-weight: 700; color: #fff;">⏱️ Automações em Segundo Plano</h2>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                    Rotinas gerenciadas pelo <strong>APScheduler</strong> para manutenção e conformidade contínua.
+                </p>
+            </div>
+            <button class="modal-close" onclick="fecharModal()">&times;</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;">
+            {% for tarefa in tarefas %}
+            <div class="diagnostic-box" style="margin-bottom: 0; background: rgba(255, 255, 255, 0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                    <div>
+                        <div style="font-size: 15px; font-weight: 600; color: #fff;">
+                            {{ tarefa.nome }}
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                            ID: <code>{{ tarefa.id }}</code>
+                        </div>
+                    </div>
+                    <button 
+                        class="btn btn-secondary btn-sm"
+                        hx-post="/api/automacoes/{{ tarefa.id }}/executar"
+                        hx-target="#msg-automacao-{{ tarefa.id }}"
+                        hx-swap="innerHTML"
+                        style="white-space: nowrap;"
+                    >
+                        ▶️ Executar Agora
+                    </button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; font-size: 13px;">
+                    <div>
+                        <span style="color: var(--text-muted);">Próxima execução:</span><br>
+                        <strong style="color: var(--accent-blue);">{{ tarefa.proxima_execucao }}</strong>
+                    </div>
+                    <div>
+                        <span style="color: var(--text-muted);">Última execução:</span><br>
+                        <strong style="color: #fff;">{{ tarefa.ultima_execucao }}</strong>
+                    </div>
+                </div>
+
+                <div id="msg-automacao-{{ tarefa.id }}" style="margin-top: 8px;"></div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 24px; color: var(--text-muted);">
+                Nenhuma tarefa agendada ativa no momento.
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 16px; padding: 12px; background: rgba(59, 130, 246, 0.08); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2); font-size: 12px; color: #93c5fd;">
+            ℹ️ <strong>Regra 118 do CLAUDE.md:</strong> Conforme termos da Places API, os dados de ficha cadastrais são re-checados a cada 60 dias para manter a base sempre legal e atualizada.
+        </div>
+
+        <div class="modal-actions" style="margin-top: 16px;">
+            <button class="btn btn-secondary" onclick="fecharModal()">Fechar</button>
+        </div>
+    </div>
+</div>

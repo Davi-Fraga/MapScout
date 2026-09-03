@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Cards de Estatísticas -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-blue">📊</div>
+        <div>
+            <div class="stat-value">{{ stats.total_leads }}</div>
+            <div class="stat-label">Total de Empresas</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-green">🔥</div>
+        <div>
+            <div class="stat-value">{{ stats.sem_site }}</div>
+            <div class="stat-label">Sem Site (Oportunidade Ouro)</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-amber">⚡</div>
+        <div>
+            <div class="stat-value">{{ stats.site_fraco_ou_fora }}</div>
+            <div class="stat-label">Site Fora do Ar ou Fraco</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-purple">🤝</div>
+        <div>
+            <div class="stat-value">{{ stats.em_prospeccao }}</div>
+            <div class="stat-label">Em Prospecção / Contato</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros Rápidos com HTMX -->
+<div class="filter-card">
+    <form 
+        hx-get="/partials/leads" 
+        hx-trigger="input, change" 
+        hx-target="#leads-tabela-container" 
+        hx-swap="innerHTML"
+        class="filter-grid"
+    >
+        <div class="filter-group">
+            <label>Buscar Empresa</label>
+            <input 
+                type="text" 
+                name="busca" 
+                placeholder="Nome da empresa ou endereço..." 
+                class="input-control"
+            >
+        </div>
+
+        <div class="filter-group">
+            <label>Cidade</label>
+            <select name="cidade" class="select-control">
+                <option value="">Todas as cidades</option>
+                {% for cid in cidades %}
+                    <option value="{{ cid }}">{{ cid }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Diagnóstico de Presença</label>
+            <select name="nivel" class="select-control">
+                <option value="">Todos os diagnósticos</option>
+                <option value="0">0 - Sem site cadastrado (Ouro)</option>
+                <option value="1">1 - Google Business Site (descontinuado)</option>
+                <option value="2">2 - Domínio fora do ar (erro HTTP/DNS)</option>
+                <option value="3">3 - Link aponta para WhatsApp</option>
+                <option value="4">4 - Domínio estacionado / em branco</option>
+                <option value="5">5 - Só rede social ou agregador</option>
+                <option value="6">6 - Construtor gratuito (Wix, etc)</option>
+                <option value="7">7 - Marketplace de terceiros</option>
+                <option value="8">8 - Site próprio com falhas técnicas</option>
+                <option value="9">9 - Site próprio saudável</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Funil / Status</label>
+            <select name="status_lead" class="select-control">
+                <option value="">Todos os status</option>
+                <option value="novo">Novo</option>
+                <option value="contatado">Contatado</option>
+                <option value="em_conversa">Em Conversa</option>
+                <option value="proposta">Proposta Enviada</option>
+                <option value="fechado">Fechado</option>
+                <option value="perdido">Perdido</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Score Mínimo</label>
+            <select name="min_score" class="select-control">
+                <option value="0">Qualquer score</option>
+                <option value="50">50+ (Médio)</option>
+                <option value="80">80+ (Alto)</option>
+                <option value="100">100+ (Excelente)</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<!-- Tabela de Leads -->
+<div class="table-card" id="leads-tabela-container">
+    {% include "partials/tabela_leads.html" %}
+</div>
+{% endblock %}

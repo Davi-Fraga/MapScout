@@ -58,6 +58,7 @@ async def varrer(
     rps: float | None = None,
     teto_dia: int | None = None,
     cliente: httpx.AsyncClient | None = None,
+    ao_progredir: Callable[[int, int, ResultadoVarredura], None] | None = None,
 ) -> ResultadoVarredura:
     """Percorre as células, subdividindo as saturadas e pulando as já executadas."""
     limite_rps = rps if rps is not None else rate_limit_rps()
@@ -77,6 +78,14 @@ async def varrer(
         with abrir_sessao(engine) as sessao:
             if celula_ja_executada(sessao, celula.id, categoria):
                 resultado.celulas_puladas += 1
+                if ao_progredir:
+                    ao_progredir(
+                        resultado.celulas_visitadas + resultado.celulas_puladas,
+                        resultado.celulas_visitadas
+                        + resultado.celulas_puladas
+                        + len(fila),
+                        resultado,
+                    )
                 continue
             if chamadas_hoje(sessao) >= teto:
                 resultado.estado = EstadoJob.PAUSED_QUOTA
@@ -127,6 +136,13 @@ async def varrer(
                 resultado.celulas_subdivididas += 1
                 resultado.celulas_saturadas.append(celula.id)
                 fila.extend(filhas)
+
+        if ao_progredir:
+            ao_progredir(
+                resultado.celulas_visitadas + resultado.celulas_puladas,
+                resultado.celulas_visitadas + resultado.celulas_puladas + len(fila),
+                resultado,
+            )
 
     if resultado.estado is EstadoJob.RUNNING:
         resultado.estado = EstadoJob.COMPLETED
