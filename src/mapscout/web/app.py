@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -10,10 +11,11 @@ from urllib.parse import parse_qs
 
 import dotenv
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlmodel import Session, col, select
+from sqlmodel import Session, col, func, select
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from mapscout.ai.client import gerar_rascunho_abordagem
@@ -28,7 +30,6 @@ from mapscout.db.repo import (
     adicionar_blocklist,
     adicionar_nota_lead,
     atualizar_status_lead,
-    esta_bloqueado,
     listar_notas_lead,
     listar_zonas_varridas,
 )
@@ -99,6 +100,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
 
 app = FastAPI(title="MapScout — Radar de Prospecção", lifespan=lifespan)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(AuthMiddleware)
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -149,63 +151,98 @@ def _filtrar_leads(
     nivel: int | None = None,
     status_lead: str | None = None,
     min_score: float = 0.0,
-) -> list[dict[str, Any]]:
-    """Consulta e filtra leads no banco de dados segundo parâmetros fornecidos."""
-    consulta = select(Place).order_by(col(Place.coletado_em).desc())
+    pagina: int = 1,
+    limite: int = 50,
+) -> tuple[list[dict[str, Any]], int]:
+    """Consulta e filtra leads com queries SQL otimizadas e paginação."""
+    consulta = select(Place)
+    contagem = select(func.count()).select_from(Place)
 
-    if cidade:
-        consulta = consulta.where(col(Place.cidade) == cidade)
-    if status_lead:
-        consulta = consulta.where(col(Place.status_lead) == status_lead)
+    if cidade and cidade.strip():
+        consulta = consulta.where(col(Place.cidade) == cidade.strip())
+        contagem = contagem.where(col(Place.cidade) == cidade.strip())
+
+    if status_lead and status_lead.strip():
+        consulta = consulta.where(col(Place.status_lead) == status_lead.strip())
+        contagem = contagem.where(col(Place.status_lead) == status_lead.strip())
+
     if nivel is not None:
         if nivel == 0:
-            consulta = consulta.where(
+            cond_n0 = (
                 (col(Place.presence_level) == 0)
                 | (col(Place.website_uri) == None)  # noqa: E711
                 | (col(Place.website_uri) == "")
             )
+            consulta = consulta.where(cond_n0)
+            contagem = contagem.where(cond_n0)
         else:
             consulta = consulta.where(col(Place.presence_level) == nivel)
+            contagem = contagem.where(col(Place.presence_level) == nivel)
 
-    todos = list(sessao.exec(consulta).all())
+    if busca and busca.strip():
+        termo = f"%{busca.strip()}%"
+        cond_busca = col(Place.display_name).ilike(termo) | col(
+            Place.formatted_address
+        ).ilike(termo)
+        consulta = consulta.where(cond_busca)
+        contagem = contagem.where(cond_busca)
+
+    if min_score > 0:
+        consulta = consulta.where(col(Place.score) >= min_score)
+        contagem = contagem.where(col(Place.score) >= min_score)
+
+    total_filtrado = sessao.exec(contagem).one()
+
+    # Ordena pelo maior score e depois pelos mais recentes
+    consulta = consulta.order_by(
+        col(Place.score).desc().nullslast(), col(Place.coletado_em).desc()
+    )
+
+    offset = max(0, (pagina - 1) * limite)
+    places = list(sessao.exec(consulta.offset(offset).limit(limite)).all())
+
     itens: list[dict[str, Any]] = []
+    for p in places:
+        itens.append(_preparar_item_lead(sessao, p))
 
-    for p in todos:
-        if esta_bloqueado(sessao, p) is not None:
-            continue
-        if busca:
-            termo = busca.lower()
-            nome = (p.display_name or "").lower()
-            endereco = (p.formatted_address or "").lower()
-            if termo not in nome and termo not in endereco:
-                continue
-
-        score = p.score or calcular_score_lead(p)
-        if score < min_score:
-            continue
-
-        item = _preparar_item_lead(sessao, p)
-        itens.append(item)
-
-    itens.sort(key=lambda x: float(x["score"]), reverse=True)
-    return itens
+    return itens, total_filtrado
 
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request, sessao: SessaoDep) -> HTMLResponse:
-    """Renderiza o painel principal do MapScout com métricas e lista inicial."""
-    todos = list(sessao.exec(select(Place)).all())
-    cidades = sorted({p.cidade for p in todos if p.cidade and p.cidade.strip()})
+    """Renderiza o painel principal do MapScout com métricas agregadas."""
+    total_leads = sessao.exec(select(func.count()).select_from(Place)).one()
+    sem_site = sessao.exec(
+        select(func.count())
+        .select_from(Place)
+        .where(
+            (col(Place.presence_level) == 0)
+            | (col(Place.website_uri) == None)  # noqa: E711
+            | (col(Place.website_uri) == "")
+        )
+    ).one()
+    site_fraco_ou_fora = sessao.exec(
+        select(func.count())
+        .select_from(Place)
+        .where(col(Place.presence_level).in_([1, 2, 3, 4, 5, 6, 8]))
+    ).one()
+    em_prospeccao = sessao.exec(
+        select(func.count())
+        .select_from(Place)
+        .where(col(Place.status_lead).in_(["contatado", "em_conversa", "proposta"]))
+    ).one()
 
-    niveis = [resolver_nivel_presenca(p) for p in todos]
-    total_leads = len(todos)
-    sem_site = sum(1 for n in niveis if n == 0)
-    site_fraco_ou_fora = sum(1 for n in niveis if n in (1, 2, 3, 4, 5, 6, 8))
-    em_prospeccao = sum(
-        1 for p in todos if p.status_lead in ("contatado", "em_conversa", "proposta")
+    cidades = list(
+        sessao.exec(
+            select(Place.cidade)
+            .where(col(Place.cidade) != None, col(Place.cidade) != "")  # noqa: E711
+            .distinct()
+            .order_by(col(Place.cidade))
+        ).all()
     )
 
-    leads = _filtrar_leads(sessao)
+    leads, total_filtrado = _filtrar_leads(sessao, pagina=1, limite=50)
+    total_paginas = max(1, math.ceil(total_filtrado / 50))
 
     stats = {
         "total_leads": total_leads,
@@ -219,7 +256,11 @@ def index(request: Request, sessao: SessaoDep) -> HTMLResponse:
         name="index.html",
         context={
             "leads": leads,
-            "cidades": cidades,
+            "total_filtrado": total_filtrado,
+            "pagina": 1,
+            "limite": 50,
+            "total_paginas": total_paginas,
+            "cidades": [c for c in cidades if c],
             "stats": stats,
             "task": gerenciador_tarefas.obter_status(),
         },
@@ -235,21 +276,32 @@ def filtrar_leads_endpoint(
     nivel: int | None = Query(default=None),
     status_lead: str | None = Query(default=None),
     min_score: float = Query(default=0.0),
+    pagina: int = Query(default=1),
+    limite: int = Query(default=50),
 ) -> HTMLResponse:
-    """Endpoint HTMX que retorna apenas a tabela de leads filtrada."""
-    leads = _filtrar_leads(
+    """Endpoint HTMX que retorna apenas a tabela de leads filtrada com paginação."""
+    leads, total_filtrado = _filtrar_leads(
         sessao,
         busca=busca,
         cidade=cidade,
         nivel=nivel,
         status_lead=status_lead,
         min_score=min_score,
+        pagina=pagina,
+        limite=limite,
     )
+    total_paginas = max(1, math.ceil(total_filtrado / limite))
 
     return templates.TemplateResponse(
         request=request,
         name="partials/tabela_leads.html",
-        context={"leads": leads},
+        context={
+            "leads": leads,
+            "total_filtrado": total_filtrado,
+            "pagina": pagina,
+            "limite": limite,
+            "total_paginas": total_paginas,
+        },
     )
 
 
@@ -292,29 +344,31 @@ def kanban_endpoint(
     cidade: str | None = None,
     nivel: int | None = None,
     min_score: float = 0.0,
+    limite_por_coluna: int = 25,
 ) -> HTMLResponse:
-    """Retorna o quadro Kanban do funil de vendas organizado por etapa comercial."""
-    leads = _filtrar_leads(
-        sessao,
-        busca=busca,
-        cidade=cidade,
-        nivel=nivel,
-        min_score=min_score,
-    )
-    leads_por_status: dict[str, list[dict[str, Any]]] = {
-        "novo": [],
-        "contatado": [],
-        "em_conversa": [],
-        "proposta": [],
-        "fechado": [],
-        "perdido": [],
-    }
-    for item in leads:
-        st = item["place"].status_lead or "novo"
-        if st in leads_por_status:
-            leads_por_status[st].append(item)
-        else:
-            leads_por_status["novo"].append(item)
+    """Retorna o quadro Kanban com os top leads mais quentes de cada etapa comercial."""
+    status_lista = [
+        "novo",
+        "contatado",
+        "em_conversa",
+        "proposta",
+        "fechado",
+        "perdido",
+    ]
+    leads_por_status: dict[str, list[dict[str, Any]]] = {}
+
+    for st in status_lista:
+        leads_col, _ = _filtrar_leads(
+            sessao,
+            busca=busca,
+            cidade=cidade,
+            nivel=nivel,
+            status_lead=st,
+            min_score=min_score,
+            pagina=1,
+            limite=limite_por_coluna,
+        )
+        leads_por_status[st] = leads_col
 
     return templates.TemplateResponse(
         request=request,

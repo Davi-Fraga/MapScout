@@ -108,6 +108,45 @@
         {% endfor %}
     </tbody>
 </table>
+
+{% if total_paginas is defined and total_paginas > 1 %}
+<div class="pagination-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: rgba(255, 255, 255, 0.02); border-top: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 10px;">
+    <div style="font-size: 13px; color: var(--text-muted);">
+        Exibindo <strong style="color: #fff;">{{ leads | length }}</strong> de <strong style="color: #fff;">{{ total_filtrado }}</strong> leads (Página {{ pagina }} de {{ total_paginas }})
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+        {% if pagina > 1 %}
+        <button 
+            type="button"
+            class="btn btn-secondary btn-sm"
+            hx-get="/partials/leads?pagina={{ pagina - 1 }}&limite={{ limite }}"
+            hx-include=".filter-grid"
+            hx-target="#leads-tabela-container"
+            hx-swap="innerHTML"
+        >
+            ⬅️ Anterior
+        </button>
+        {% endif %}
+        
+        <span style="font-size: 12px; color: var(--text-dim); padding: 0 4px;">
+            {{ pagina }} / {{ total_paginas }}
+        </span>
+
+        {% if pagina < total_paginas %}
+        <button 
+            type="button"
+            class="btn btn-primary btn-sm"
+            hx-get="/partials/leads?pagina={{ pagina + 1 }}&limite={{ limite }}"
+            hx-include=".filter-grid"
+            hx-target="#leads-tabela-container"
+            hx-swap="innerHTML"
+        >
+            Próxima ➡️
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
 {% else %}
 <div style="padding: 48px 24px; text-align: center; color: var(--text-muted);">
     <div style="font-size: 44px; margin-bottom: 12px;">🎯</div>
