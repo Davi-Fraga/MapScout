@@ -1,9 +1,10 @@
 # Build stage / Runtime usando Python 3.12 e uv
 FROM python:3.12-slim
 
-# Evita criação de arquivos .pyc e força saída não bufferizada
+# Garante que o Python encontre o pacote mapscout em /app/src
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src
 
 WORKDIR /app
 
@@ -16,14 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Instala uv para gerenciamento ultra-rápido de pacotes
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-# Copia arquivos de dependência
+# Copia dependências e código-fonte
 COPY pyproject.toml /app/
-
-# Instala dependências do projeto
-RUN uv pip install --system --no-cache -e .
-
-# Copia o código-fonte e os templates
 COPY src/ /app/src/
+
+# Instala dependências do projeto no Python do sistema
+RUN uv pip install --system --no-cache -e .
 
 # Porta padrão de execução (o Render injeta $PORT)
 ENV PORT=8000
