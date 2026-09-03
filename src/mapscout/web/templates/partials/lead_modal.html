@@ -1,5 +1,5 @@
 <div class="modal-overlay" onclick="if (event.target === this) fecharModal()">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 680px; max-height: 90vh; overflow-y: auto;">
         <div class="modal-header">
             <div>
                 <h2 style="font-size: 20px; font-weight: 700; color: #fff;">{{ place.display_name }}</h2>
@@ -10,6 +10,7 @@
             <button class="modal-close" onclick="fecharModal()">&times;</button>
         </div>
 
+        <!-- Diagnóstico de Presença -->
         <div class="diagnostic-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <span style="font-size: 12px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase;">
@@ -23,71 +24,125 @@
                 {{ place.presence_evidence or "Sem diagnóstico disponível." }}
             </p>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 14px; font-size: 13px; color: var(--text-muted);">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 12px; font-size: 12px; color: var(--text-muted);">
                 <div><strong>Site Atual:</strong> {{ place.website_uri or "Nenhum" }}</div>
-                <div><strong>Mobile Viewport:</strong> {% if place.has_mobile_viewport %}✅ Sim{% elif place.has_mobile_viewport is false %}❌ Não{% else %}—{% endif %}</div>
-                <div><strong>Segurança SSL:</strong> {% if place.has_ssl %}✅ Sim{% elif place.has_ssl is false %}❌ Inseguro (HTTP){% else %}—{% endif %}</div>
-                <div><strong>Última Atualização:</strong> {{ place.copyright_year or "—" }}</div>
-                <div><strong>E-mails:</strong> {{ place.emails or "Nenhum" }}</div>
-                <div><strong>Instagram:</strong> {% if place.instagram_url %}<a href="{{ place.instagram_url }}" target="_blank" style="color: var(--accent-blue);">Abrir Perfil</a>{% else %}—{% endif %}</div>
+                <div><strong>Segurança SSL:</strong> {% if place.has_ssl %}✅ Sim{% elif place.has_ssl is false %}❌ HTTP Inseguro{% else %}—{% endif %}</div>
+                <div><strong>Mobile:</strong> {% if place.has_mobile_viewport %}✅ Otimizado{% elif place.has_mobile_viewport is false %}❌ Não{% else %}—{% endif %}</div>
+                <div><strong>Instagram:</strong> {% if place.instagram_url %}<a href="{{ place.instagram_url }}" target="_blank" style="color: var(--accent-blue);">Abrir</a>{% else %}—{% endif %}</div>
             </div>
         </div>
 
-        <div class="pitch-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <!-- Central de Abordagem WhatsApp com Modelos Prontos -->
+        <div class="pitch-box" style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <label style="font-size: 12px; font-weight: 700; color: var(--accent-green); text-transform: uppercase;">
-                    💬 Rascunho de Abordagem para WhatsApp (IA Ancorada)
+                    💬 Rascunho de Abordagem e Modelos Rápidos (WhatsApp)
                 </label>
-                <button 
-                    class="btn btn-secondary btn-sm"
-                    onclick="copiarTexto('pitch-whatsapp-text', this)"
-                >
-                    📋 Copiar Mensagem
+                <button class="btn btn-secondary btn-sm" onclick="copiarTexto('pitch-whatsapp-text', this)">
+                    📋 Copiar Texto
                 </button>
             </div>
-            <textarea id="pitch-whatsapp-text" class="pitch-textarea" readonly>{{ abordagem.mensagem_whatsapp }}</textarea>
-        </div>
 
-        {% if abordagem.mensagem_email %}
-        <div class="pitch-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label style="font-size: 12px; font-weight: 700; color: var(--accent-purple); text-transform: uppercase;">
-                    ✉️ Rascunho de E-mail Consultivo
-                </label>
-                <button 
-                    class="btn btn-secondary btn-sm"
-                    onclick="copiarTexto('pitch-email-text', this)"
-                >
-                    📋 Copiar E-mail
-                </button>
+            <!-- Botões de templates rápidos -->
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+                <button type="button" class="btn-preset" onclick="definirPitch('ia')">🤖 Pitch IA</button>
+                <button type="button" class="btn-preset" onclick="definirPitch('sem_site')">🚫 Sem Site</button>
+                <button type="button" class="btn-preset" onclick="definirPitch('fora_do_ar')">🔴 Site Fora do Ar</button>
+                <button type="button" class="btn-preset" onclick="definirPitch('google_site')">⚠️ Google Site</button>
             </div>
-            <textarea id="pitch-email-text" class="pitch-textarea" readonly>{{ abordagem.mensagem_email }}</textarea>
-        </div>
-        {% endif %}
 
-        <div class="modal-actions">
+            <textarea id="pitch-whatsapp-text" class="pitch-textarea" style="min-height: 90px;">{{ abordagem.mensagem_whatsapp }}</textarea>
+        </div>
+
+        <!-- Histórico Comercial & Anotações da Equipe -->
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; margin-top: 14px;">
+            <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span>📝 Histórico & Anotações com seu Sócio</span>
+                <span style="font-size: 11px; color: var(--text-dim);">Compartilhado em tempo real</span>
+            </div>
+
+            <!-- Formulário para adicionar anotação rápida -->
+            <form 
+                hx-post="/api/leads/{{ place.place_id }}/notas" 
+                hx-target="#lista-notas-container" 
+                hx-swap="innerHTML"
+                style="display: flex; gap: 8px; margin-bottom: 12px;"
+            >
+                <input 
+                    type="text" 
+                    name="texto" 
+                    placeholder="Escreva uma anotação (Ex: Falei com a recepção, retorno amanhã)..." 
+                    class="input-control" 
+                    style="flex: 1; font-size: 12px; padding: 6px 10px;"
+                    required
+                >
+                <button type="submit" class="btn btn-primary btn-sm" style="padding: 6px 14px;">
+                    Salvar
+                </button>
+            </form>
+
+            <!-- Lista de Anotações -->
+            <div id="lista-notas-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 140px; overflow-y: auto;">
+                {% if notas %}
+                    {% for n in notas %}
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 4px; padding: 6px 10px; font-size: 12px;">
+                        <div style="display: flex; justify-content: space-between; color: var(--text-dim); font-size: 10px; margin-bottom: 2px;">
+                            <span>👤 {{ n.autor }}</span>
+                            <span>{{ n.criado_em.strftime('%d/%m às %H:%M') if n.criado_em else '' }}</span>
+                        </div>
+                        <div style="color: #fff;">{{ n.texto }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="font-size: 12px; color: var(--text-dim); text-align: center; padding: 6px;">
+                        Nenhuma anotação registrada para este lead ainda.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 14px;">
             <button 
                 class="btn btn-secondary"
                 hx-post="/api/lead/{{ place.place_id }}/block"
-                hx-confirm="Tem certeza que deseja adicionar este lead à Blocklist (opt-out definitivo)?"
+                hx-confirm="Tem certeza que deseja adicionar este lead à Blocklist?"
                 hx-target="#lead-row-{{ place.place_id }}"
                 hx-swap="outerHTML"
                 onclick="fecharModal()"
                 style="color: var(--accent-red); margin-right: auto;"
             >
-                🚫 Bloquear Lead (Opt-out)
+                🚫 Bloquear Lead
             </button>
             <button class="btn btn-secondary" onclick="fecharModal()">Fechar</button>
             {% if link_whatsapp %}
             <a 
+                id="btn-link-whats-modal"
                 href="{{ link_whatsapp }}" 
                 target="_blank" 
                 rel="noopener"
                 class="btn btn-whatsapp"
+                hx-post="/api/leads/{{ place.place_id }}/status"
+                hx-vals='{"status": "contatado"}'
+                hx-target="#view-container"
             >
-                🚀 Abrir no WhatsApp Web
+                🚀 Abrir WhatsApp & Marcar Contatado
             </a>
             {% endif %}
         </div>
     </div>
 </div>
+
+<script>
+    const PITCH_IA = {{ abordagem.mensagem_whatsapp | tojson }};
+    const PITCH_SEM_SITE = "Olá, tudo bem? Notei que o perfil de {{ place.display_name }} tem excelentes avaliações no Google{% if place.rating %} (nota {{ place.rating }}){% endif %}, mas vocês ainda não têm um site próprio oficial. Vocês atendem novos clientes por indicação ou gostariam de receber contatos diretos do Google?";
+    const PITCH_FORA_DO_AR = "Olá! Estava navegando no Google e tentei acessar o site da {{ place.display_name }} ({{ place.website_uri }}), mas notei que a página está fora do ar. Vocês já estão cientes dessa instabilidade? Se precisarem de suporte para restabelecer, fico à disposição!";
+    const PITCH_GOOGLE_SITE = "Olá! Vi que o site da {{ place.display_name }} utilizava a ferramenta gratuita do Google que foi descontinuada recentemente. Vocês já conseguiram migrar para um domínio próprio oficial?";
+
+    function definirPitch(tipo) {
+        const txt = document.getElementById('pitch-whatsapp-text');
+        if (tipo === 'ia') txt.value = PITCH_IA;
+        else if (tipo === 'sem_site') txt.value = PITCH_SEM_SITE;
+        else if (tipo === 'fora_do_ar') txt.value = PITCH_FORA_DO_AR;
+        else if (tipo === 'google_site') txt.value = PITCH_GOOGLE_SITE;
+    }
+</script>

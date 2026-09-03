@@ -104,8 +104,53 @@
     </form>
 </div>
 
-<!-- Tabela de Leads -->
-<div class="table-card" id="leads-tabela-container">
-    {% include "partials/tabela_leads.html" %}
+<!-- Alternador de Visualização: Tabela vs Kanban -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+    <div class="view-tabs">
+        <button 
+            type="button" 
+            class="view-tab-btn active" 
+            id="tab-tabela"
+            onclick="alternarVisualizacao('tabela')"
+        >
+            📊 Tabela de Leads
+        </button>
+        <button 
+            type="button" 
+            class="view-tab-btn" 
+            id="tab-kanban"
+            onclick="alternarVisualizacao('kanban')"
+        >
+            📋 Funil de Vendas (Kanban)
+        </button>
+    </div>
+    <div style="font-size: 13px; color: var(--text-muted);">
+        Oportunidades mapeadas: <strong style="color: #fff;">{{ stats.total_leads }}</strong>
+    </div>
 </div>
+
+<!-- Container Dinâmico da Visualização Selecionada -->
+<div id="view-container">
+    <div class="table-card" id="leads-tabela-container">
+        {% include "partials/tabela_leads.html" %}
+    </div>
+</div>
+
+<script>
+    let modoAtual = 'tabela';
+    function alternarVisualizacao(modo) {
+        modoAtual = modo;
+        const tabTab = document.getElementById('tab-tabela');
+        const tabKan = document.getElementById('tab-kanban');
+        if (modo === 'tabela') {
+            tabTab.classList.add('active');
+            tabKan.classList.remove('active');
+            htmx.ajax('GET', '/partials/leads', '#view-container');
+        } else {
+            tabKan.classList.add('active');
+            tabTab.classList.remove('active');
+            htmx.ajax('GET', '/partials/kanban', '#view-container');
+        }
+    }
+</script>
 {% endblock %}

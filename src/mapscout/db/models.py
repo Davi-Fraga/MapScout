@@ -92,3 +92,31 @@ class AiCache(SQLModel, table=True):
     hash_entrada: str = Field(index=True)
     resposta_json: str
     criado_em: datetime = Field(default_factory=agora_utc)
+
+
+class ScanZone(SQLModel, table=True):
+    """Zona geográfica que já foi varrida para evitar chamadas redundantes."""
+
+    __tablename__ = "scan_zones"
+
+    id: int | None = Field(default=None, primary_key=True)
+    cidade: str = Field(index=True)
+    categoria: str = Field(index=True)
+    lat: float
+    lng: float
+    raio_km: float = 5.0
+    passo_m: float = 1000.0
+    total_encontrados: int = 0
+    criado_em: datetime = Field(default_factory=agora_utc)
+
+
+class LeadNote(SQLModel, table=True):
+    """Anotação comercial e histórico de contato com um lead."""
+
+    __tablename__ = "lead_notes"
+
+    id: int | None = Field(default=None, primary_key=True)
+    place_id: str = Field(foreign_key="places.place_id", index=True)
+    autor: str = "davi"
+    texto: str
+    criado_em: datetime = Field(default_factory=agora_utc)

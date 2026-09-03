@@ -1,5 +1,5 @@
 <div class="modal-overlay" onclick="if (event.target === this) fecharModal()">
-    <div class="modal-content" style="max-width: 620px;">
+    <div class="modal-content" style="max-width: 640px;">
         <div class="modal-header">
             <div>
                 <h2 style="font-size: 20px; font-weight: 700; color: #fff;">🚀 Nova Varredura de Mercado</h2>
@@ -46,7 +46,7 @@
                     type="text" 
                     id="input-cidade" 
                     name="cidade" 
-                    placeholder="Digite o nome de qualquer cidade (Ex: Campinas, Santos, Sorocaba, Recife...)" 
+                    placeholder="Digite o nome de qualquer cidade (Ex: Campinas, Santos, Goiânia, Recife...)" 
                     class="input-control" 
                     list="datalist-cidades"
                     value="Campinas"
@@ -68,8 +68,25 @@
                     <button type="button" class="btn-preset" onclick="definirCidadePreset('Belo Horizonte', -19.9167, -43.9345)">Belo Horizonte/MG</button>
                     <button type="button" class="btn-preset" onclick="definirCidadePreset('Curitiba', -25.4284, -49.2733)">Curitiba/PR</button>
                     <button type="button" class="btn-preset" onclick="definirCidadePreset('Santos', -23.9608, -46.3336)">Santos/SP</button>
+                    <button type="button" class="btn-preset" onclick="definirCidadePreset('Goiânia', -16.6869, -49.2648)">Goiânia/GO</button>
                 </div>
             </div>
+
+            <!-- Memória Geográfica: Zonas já Varridas -->
+            {% if zonas_recentes %}
+            <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: var(--radius-sm); padding: 10px 14px;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--accent-blue); margin-bottom: 6px;">
+                    🧭 Memória de Radar: Zonas Já Mapeadas
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    {% for z in zonas_recentes[:4] %}
+                    <span style="font-size: 11px; background: rgba(255, 255, 255, 0.05); padding: 4px 8px; border-radius: 4px; color: var(--text-main);">
+                        ✓ {{ z.cidade }} ({{ z.categoria }}): {{ z.total_encontrados }} leads
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Raio de Coleta -->
             <div class="filter-group">
@@ -81,11 +98,24 @@
                 </div>
             </div>
 
-            <!-- Coordenadas Geográficas (Preenchidas Automaticamente) -->
+            <!-- Coordenadas Geográficas & Deslocamento de Bairros -->
             <details style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 14px;">
                 <summary style="font-size: 12px; color: var(--text-muted); cursor: pointer; font-weight: 600;">
-                    📍 Coordenadas Geográficas (Preenchidas Automaticamente)
+                    📍 Centro Geográfico & Deslocamento para Outros Bairros
                 </summary>
+                
+                <div style="margin-top: 10px;">
+                    <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 6px;">
+                        Quer buscar em outro canto da cidade? Desloque o centro da busca com 1 clique:
+                    </div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('norte')">⬆️ Norte (+5km)</button>
+                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('sul')">⬇️ Sul (+5km)</button>
+                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('leste')">➡️ Leste (+5km)</button>
+                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('oeste')">⬅️ Oeste (+5km)</button>
+                    </div>
+                </div>
+
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
                     <div>
                         <label style="font-size: 11px; color: var(--text-dim);">Latitude</label>
@@ -99,9 +129,6 @@
                         <label style="font-size: 11px; color: var(--text-dim);">Passo Célula (m)</label>
                         <input type="number" name="passo_m" value="1000" step="100" class="input-control" style="padding: 6px 10px; font-size: 12px;">
                     </div>
-                </div>
-                <div style="font-size: 11px; color: var(--text-dim); margin-top: 6px;">
-                    ✓ Se deixar vazio ou não alterar, as coordenadas serão calculadas automaticamente pelo nome da cidade.
                 </div>
             </details>
 
@@ -142,5 +169,26 @@
                 break;
             }
         }
+    }
+
+    function deslocarCoordenadas(direcao) {
+        const latInput = document.getElementById('input-lat');
+        const lngInput = document.getElementById('input-lng');
+        const raioInput = document.getElementById('input-raio-km');
+        const distKm = parseFloat(raioInput.value) || 5.0;
+
+        let lat = parseFloat(latInput.value) || 0;
+        let lng = parseFloat(lngInput.value) || 0;
+        const deltaLat = distKm / 111.0;
+        const latRad = lat * (Math.PI / 180);
+        const deltaLng = distKm / (111.0 * Math.cos(latRad));
+
+        if (direcao === 'norte') lat += deltaLat;
+        else if (direcao === 'sul') lat -= deltaLat;
+        else if (direcao === 'leste') lng += deltaLng;
+        else if (direcao === 'oeste') lng -= deltaLng;
+
+        latInput.value = lat.toFixed(4);
+        lngInput.value = lng.toFixed(4);
     }
 </script>

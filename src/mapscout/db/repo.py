@@ -8,7 +8,15 @@ from datetime import datetime, time, timedelta
 from sqlmodel import Session, col, func, select
 
 from mapscout.collect.jobs import EstadoJob, GridLog, SearchJob
-from mapscout.db.models import ApiCall, Blocklist, Place, agora_utc, para_utc_naive
+from mapscout.db.models import (
+    ApiCall,
+    Blocklist,
+    LeadNote,
+    Place,
+    ScanZone,
+    agora_utc,
+    para_utc_naive,
+)
 from mapscout.dominios import e_compartilhado
 from mapscout.normalize.domain import dominio_registravel
 from mapscout.normalize.phone import normalizar_telefone
@@ -303,4 +311,87 @@ def listar_places_por_nivel(
 def listar_jobs(sessao: Session, limite: int = 10) -> list[SearchJob]:
     """Lista as varreduras mais recentes registradas no sistema."""
     consulta = select(SearchJob).order_by(col(SearchJob.id).desc()).limit(limite)
+    return list(sessao.exec(consulta).all())
+
+
+def registrar_zona_varrida(
+    sessao: Session,
+    *,
+    cidade: str,
+    categoria: str,
+    lat: float,
+    lng: float,
+    raio_km: float,
+    passo_m: float,
+    total_encontrados: int = 0,
+) -> ScanZone:
+    """Registra uma nova zona geográfica varrida para memória de radar."""
+    zona = ScanZone(
+        cidade=cidade,
+        categoria=categoria,
+        lat=lat,
+        lng=lng,
+        raio_km=raio_km,
+        passo_m=passo_m,
+        total_encontrados=total_encontrados,
+    )
+    sessao.add(zona)
+    sessao.commit()
+    sessao.refresh(zona)
+    return zona
+
+
+def listar_zonas_varridas(
+    sessao: Session,
+    *,
+    cidade: str | None = None,
+    categoria: str | None = None,
+    limite: int = 20,
+) -> list[ScanZone]:
+    """Lista zonas já varridas filtrando por cidade ou categoria."""
+    consulta = select(ScanZone).order_by(col(ScanZone.criado_em).desc())
+    if cidade:
+        consulta = consulta.where(col(ScanZone.cidade) == cidade)
+    if categoria:
+        consulta = consulta.where(col(ScanZone.categoria) == categoria)
+    return list(sessao.exec(consulta.limit(limite)).all())
+
+
+def atualizar_status_lead(sessao: Session, place_id: str, novo_status: str) -> bool:
+    """Atualiza o estágio do lead no funil de vendas (Kanban)."""
+    place = sessao.get(Place, place_id)
+    if not place:
+        return False
+    place.status_lead = novo_status
+    sessao.add(place)
+    sessao.commit()
+    return True
+
+
+def adicionar_nota_lead(
+    sessao: Session,
+    *,
+    place_id: str,
+    texto: str,
+    autor: str = "davi",
+) -> LeadNote:
+    """Cria uma nova anotação de histórico comercial para o lead."""
+    nota = LeadNote(
+        place_id=place_id,
+        texto=texto.strip(),
+        autor=autor.strip(),
+    )
+    sessao.add(nota)
+    sessao.commit()
+    sessao.refresh(nota)
+    return nota
+
+
+def listar_notas_lead(sessao: Session, place_id: str) -> list[LeadNote]:
+    """Retorna todas as notas de um lead em ordem cronológica reversa."""
+    consulta = (
+        select(LeadNote)
+        .where(col(LeadNote.place_id) == place_id)
+        .order_by(col(LeadNote.criado_em).desc())
+    )
     return list(sessao.exec(consulta).all())

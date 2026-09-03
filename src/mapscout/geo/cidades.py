@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import unicodedata
 from typing import Any
 
@@ -153,3 +154,33 @@ def obter_coordenadas_cidade(cidade: str) -> tuple[float, float] | None:
             return float(c["lat"]), float(c["lng"])
 
     return None
+
+
+def calcular_deslocamento_coordenadas(
+    lat: float, lng: float, direcao: str, distancia_km: float
+) -> tuple[float, float]:
+    """Calcula novo par lat/lng deslocando um centro geográfico em km."""
+    delta_lat = distancia_km / 111.0
+    lat_rad = math.radians(lat)
+    fator_lng = math.cos(lat_rad)
+    delta_lng = distancia_km / (111.0 * fator_lng if abs(fator_lng) > 1e-6 else 111.0)
+
+    dir_norm = direcao.lower().strip()
+    if dir_norm == "norte":
+        return round(lat + delta_lat, 6), round(lng, 6)
+    if dir_norm == "sul":
+        return round(lat - delta_lat, 6), round(lng, 6)
+    if dir_norm == "leste":
+        return round(lat, 6), round(lng + delta_lng, 6)
+    if dir_norm == "oeste":
+        return round(lat, 6), round(lng - delta_lng, 6)
+    if dir_norm == "nordeste":
+        return round(lat + delta_lat * 0.707, 6), round(lng + delta_lng * 0.707, 6)
+    if dir_norm == "noroeste":
+        return round(lat + delta_lat * 0.707, 6), round(lng - delta_lng * 0.707, 6)
+    if dir_norm == "sudeste":
+        return round(lat - delta_lat * 0.707, 6), round(lng + delta_lng * 0.707, 6)
+    if dir_norm == "sudoeste":
+        return round(lat - delta_lat * 0.707, 6), round(lng - delta_lng * 0.707, 6)
+
+    return lat, lng

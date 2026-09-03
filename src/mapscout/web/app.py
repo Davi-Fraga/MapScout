@@ -24,12 +24,20 @@ from mapscout.auth import (
     verificar_credenciais,
 )
 from mapscout.db.models import Place
-from mapscout.db.repo import adicionar_blocklist, esta_bloqueado, upsert_place
+from mapscout.db.repo import (
+    adicionar_blocklist,
+    adicionar_nota_lead,
+    atualizar_status_lead,
+    esta_bloqueado,
+    listar_notas_lead,
+    listar_zonas_varridas,
+)
 from mapscout.db.session import abrir_sessao, criar_engine, preparar_banco
 from mapscout.export import exportar_leads_qualificados, formatar_link_whatsapp
 from mapscout.geo.cidades import (
     CIDADES_BRASIL,
     buscar_cidades,
+    calcular_deslocamento_coordenadas,
     obter_coordenadas_cidade,
 )
 from mapscout.scoring import calcular_score_lead
@@ -251,7 +259,7 @@ def detalhar_lead_modal(
     place_id: str,
     sessao: SessaoDep,
 ) -> HTMLResponse:
-    """Carrega o modal com a auditoria completa e pitch comercial da IA."""
+    """Carrega o modal com a auditoria completa, pitches e histórico de anotações."""
     place = sessao.get(Place, place_id)
     if not place:
         raise HTTPException(status_code=404, detail="Lead não encontrado")
@@ -261,6 +269,7 @@ def detalhar_lead_modal(
     link_whats = formatar_link_whatsapp(
         place.national_phone_number, abordagem.mensagem_whatsapp
     )
+    notas = listar_notas_lead(sessao, place_id)
 
     return templates.TemplateResponse(
         request=request,
@@ -270,43 +279,115 @@ def detalhar_lead_modal(
             "score": score,
             "abordagem": abordagem,
             "link_whatsapp": link_whats,
+            "notas": notas,
         },
     )
 
 
-@app.post("/api/lead/{place_id}/status", response_class=HTMLResponse)
-async def atualizar_status_lead(
+@app.get("/partials/kanban", response_class=HTMLResponse)
+def kanban_endpoint(
     request: Request,
-    place_id: str,
     sessao: SessaoDep,
-    novo_status: str | None = Query(default=None),
+    busca: str | None = None,
+    cidade: str | None = None,
+    nivel: int | None = None,
+    min_score: float = 0.0,
 ) -> HTMLResponse:
-    """Atualiza o estágio do lead no funil e devolve a linha da tabela atualizada."""
-    status_final = novo_status
-    if not status_final:
-        corpo = (await request.body()).decode("utf-8")
-        parsed = parse_qs(corpo)
-        if parsed.get("novo_status"):
-            status_final = parsed["novo_status"][0]
-
-    if not status_final:
-        status_final = "novo"
-
-    place = sessao.get(Place, place_id)
-    if not place:
-        raise HTTPException(status_code=404, detail="Lead não encontrado")
-
-    place.status_lead = status_final
-    upsert_place(sessao, place)
-    sessao.commit()
-
-    item = _preparar_item_lead(sessao, place)
+    """Retorna o quadro Kanban do funil de vendas organizado por etapa comercial."""
+    leads = _filtrar_leads(
+        sessao,
+        busca=busca,
+        cidade=cidade,
+        nivel=nivel,
+        min_score=min_score,
+    )
+    leads_por_status: dict[str, list[dict[str, Any]]] = {
+        "novo": [],
+        "contatado": [],
+        "em_conversa": [],
+        "proposta": [],
+        "fechado": [],
+        "perdido": [],
+    }
+    for item in leads:
+        st = item["place"].status_lead or "novo"
+        if st in leads_por_status:
+            leads_por_status[st].append(item)
+        else:
+            leads_por_status["novo"].append(item)
 
     return templates.TemplateResponse(
         request=request,
-        name="partials/tabela_leads.html",
-        context={"leads": [item]},
+        name="partials/kanban.html",
+        context={"leads_por_status": leads_por_status},
     )
+
+
+@app.post("/api/leads/{place_id}/status", response_class=HTMLResponse)
+@app.post("/api/lead/{place_id}/status", response_class=HTMLResponse)
+async def atualizar_status_lead_endpoint(
+    request: Request,
+    place_id: str,
+    sessao: SessaoDep,
+    status: str | None = Query(default=None),
+) -> HTMLResponse:
+    """Atualiza o estágio do lead e devolve a visualização Kanban atualizada."""
+    status_final = status
+    if not status_final:
+        corpo = (await request.body()).decode("utf-8")
+        parsed = parse_qs(corpo)
+        if parsed.get("status"):
+            status_final = parsed["status"][0]
+        elif parsed.get("novo_status"):
+            status_final = parsed["novo_status"][0]
+
+    if status_final:
+        atualizar_status_lead(sessao, place_id, status_final)
+
+    return kanban_endpoint(
+        request=request,
+        sessao=sessao,
+        busca=None,
+        cidade=None,
+        nivel=None,
+        min_score=0.0,
+    )
+
+
+@app.post("/api/leads/{place_id}/notas", response_class=HTMLResponse)
+async def adicionar_nota_endpoint(
+    request: Request,
+    place_id: str,
+    sessao: SessaoDep,
+) -> HTMLResponse:
+    """Adiciona anotação de contato e histórico ao lead."""
+    corpo = (await request.body()).decode("utf-8")
+    dados = parse_qs(corpo)
+    texto = dados.get("texto", [""])[0]
+    usuario = getattr(request.state, "usuario", "davi")
+
+    if texto.strip():
+        adicionar_nota_lead(sessao, place_id=place_id, texto=texto, autor=usuario)
+
+    notas = listar_notas_lead(sessao, place_id)
+    html_itens = []
+    for n in notas:
+        dt_str = n.criado_em.strftime("%d/%m às %H:%M") if n.criado_em else ""
+        html_itens.append(
+            '<div style="background: rgba(255, 255, 255, 0.03); '
+            "border: 1px solid rgba(255, 255, 255, 0.05); "
+            'border-radius: 4px; padding: 6px 10px; font-size: 12px;">'
+            f'<div style="display: flex; justify-content: space-between; '
+            f'color: var(--text-dim); font-size: 10px; margin-bottom: 2px;">'
+            f"<span>👤 {n.autor}</span><span>{dt_str}</span></div>"
+            f'<div style="color: #fff;">{n.texto}</div></div>'
+        )
+
+    conteudo = "\n".join(html_itens) or (
+        '<div style="font-size: 12px; color: var(--text-dim); '
+        'text-align: center; padding: 6px;">Nenhuma anotação.</div>'
+    )
+    return HTMLResponse(content=conteudo)
 
 
 @app.post("/api/lead/{place_id}/block", response_class=HTMLResponse)
@@ -374,13 +455,31 @@ def buscar_cidades_endpoint(q: str = Query(default="")) -> list[dict[str, Any]]:
     return buscar_cidades(q)
 
 
+@app.get("/api/geo/deslocamento")
+def geo_deslocamento_endpoint(
+    lat: float = Query(...),
+    lng: float = Query(...),
+    direcao: str = Query(...),
+    distancia_km: float = Query(default=5.0),
+) -> dict[str, float]:
+    """Calcula novo par lat/lng deslocando centro em km."""
+    nova_lat, nova_lng = calcular_deslocamento_coordenadas(
+        lat, lng, direcao, distancia_km
+    )
+    return {"lat": nova_lat, "lng": nova_lng}
+
+
 @app.get("/partials/modal/varrer", response_class=HTMLResponse)
-def modal_nova_varredura(request: Request) -> HTMLResponse:
+def modal_nova_varredura(request: Request, sessao: SessaoDep) -> HTMLResponse:
     """Retorna o modal de configuração para iniciar uma nova varredura."""
+    zonas_recentes = listar_zonas_varridas(sessao, limite=6)
     return templates.TemplateResponse(
         request=request,
         name="partials/nova_varredura_modal.html",
-        context={"cidades_brasil": CIDADES_BRASIL},
+        context={
+            "cidades_brasil": CIDADES_BRASIL,
+            "zonas_recentes": zonas_recentes,
+        },
     )
 
 

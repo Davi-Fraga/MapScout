@@ -14,6 +14,7 @@ from mapscout.db.repo import (
     criar_job,
     listar_places_para_enriquecer,
     marcar_job,
+    registrar_zona_varrida,
     salvar_place_enriquecido,
 )
 from mapscout.db.session import abrir_sessao
@@ -172,6 +173,20 @@ class TaskManager:
                     f"Varredura concluída! {resultado.total_bruto} processados, "
                     f"{resultado.novos} novos cadastrados."
                 )
+                try:
+                    with abrir_sessao(engine) as sessao:
+                        registrar_zona_varrida(
+                            sessao,
+                            cidade=cidade,
+                            categoria=categoria,
+                            lat=lat,
+                            lng=lng,
+                            raio_km=raio_km,
+                            passo_m=passo_m,
+                            total_encontrados=resultado.novos,
+                        )
+                except Exception:
+                    pass
         except Exception as erro:
             self.status = "failed"
             self.mensagem = f"Erro na varredura: {erro}"
