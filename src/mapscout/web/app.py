@@ -78,6 +78,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         caminho = request.url.path
         if (
             caminho == "/login"
+            or caminho == "/ping"
+            or caminho == "/health"
             or caminho.startswith("/static")
             or caminho == "/favicon.ico"
         ):
@@ -683,3 +685,11 @@ def logout_endpoint() -> RedirectResponse:
     resposta = RedirectResponse(url="/login", status_code=303)
     resposta.delete_cookie(key=COOKIE_NAME)
     return resposta
+
+
+@app.get("/ping")
+@app.get("/health")
+def ping_endpoint() -> dict[str, str]:
+    """Endpoint de healthcheck para monitoramento e keep-alive do Render."""
+    return {"status": "ok"}
+

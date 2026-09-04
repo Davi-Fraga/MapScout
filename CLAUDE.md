@@ -30,6 +30,9 @@ make api        # uvicorn em dev
 
 ## Regras invioláveis
 
+0. **Sempre dê `git pull` antes de qualquer alteração ou análise.** Há múltiplos
+   devs trabalhando no repositório. O código local DEVE estar atualizado com
+   `origin/main` antes de começar qualquer análise ou alteração.
 1. **Testes nunca acessam a rede.** Use `respx` e as fixtures de
    `tests/fixtures/`. Toda chamada externa é paga ou instável.
 2. **Nunca invente nomes de campo de API externa.** Se não houver fixture real
