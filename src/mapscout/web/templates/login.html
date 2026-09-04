@@ -63,14 +63,14 @@
     <div class="login-wrapper">
         <div class="login-card">
             <div class="login-header">
-                <div class="login-icon">🎯</div>
+                <div class="login-icon"><svg class="icon icon-radar" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/><path d="M12 2a10 10 0 0 0 0 20"/></svg></div>
                 <h1 class="login-title">MapScout</h1>
                 <p class="login-subtitle">Acesso restrito de inteligência comercial</p>
             </div>
 
             {% if erro %}
             <div class="login-error">
-                <span>⚠️</span>
+                <span><svg class="icon icon-alert-triangle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
                 <span>{{ erro }}</span>
             </div>
             {% endif %}
@@ -109,7 +109,7 @@
             </form>
 
             <div style="text-align: center; margin-top: 24px; font-size: 12px; color: var(--text-dim);">
-                🔒 Protegido com criptografia HMAC-SHA256
+                <svg class="icon icon-shield" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Protegido com criptografia HMAC-SHA256
             </div>
         </div>
     </div>

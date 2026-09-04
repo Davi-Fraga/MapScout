@@ -16,7 +16,7 @@
                 <span style="font-size: 12px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase;">
                     🔍 Diagnóstico de Presença Digital (Nível {{ place.presence_level if place.presence_level is not none else 0 }})
                 </span>
-                <span class="badge badge-level-{{ place.presence_level if place.presence_level is not none else 0 }}">
+                <span class="badge {{ 'danger' if place.presence_level == 2 else 'warning' if place.presence_level == 1 else 'success' if place.presence_level == 0 else 'neutral' }}">
                     Score de Oportunidade: {{ score }}
                 </span>
             </div>
@@ -39,7 +39,8 @@
                     💬 Rascunho de Abordagem e Modelos Rápidos (WhatsApp)
                 </label>
                 <button class="btn btn-secondary btn-sm" onclick="copiarTexto('pitch-whatsapp-text', this)">
-                    📋 Copiar Texto
+                    <svg class="icon icon-message" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    Copiar Texto
                 </button>
             </div>
 
@@ -57,7 +58,7 @@
         <!-- Histórico Comercial & Anotações da Equipe -->
         <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; margin-top: 14px;">
             <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                <span>📝 Histórico & Anotações com seu Sócio</span>
+                <span><svg class="icon icon-file-text" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Histórico & Anotações com seu Sócio</span>
                 <span style="font-size: 11px; color: var(--text-dim);">Compartilhado em tempo real</span>
             </div>
 
@@ -87,7 +88,7 @@
                     {% for n in notas %}
                     <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 4px; padding: 6px 10px; font-size: 12px;">
                         <div style="display: flex; justify-content: space-between; color: var(--text-dim); font-size: 10px; margin-bottom: 2px;">
-                            <span>👤 {{ n.autor }}</span>
+                            <span><svg class="icon icon-user" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> {{ n.autor }}</span>
                             <span>{{ n.criado_em.strftime('%d/%m às %H:%M') if n.criado_em else '' }}</span>
                         </div>
                         <div style="color: #fff;">{{ n.texto }}</div>
@@ -101,10 +102,11 @@
             </div>
         </div>
 
+        <!-- Modal Actions -->
         <div class="modal-actions" style="margin-top: 14px;">
             <button 
                 class="btn btn-secondary"
-                hx-post="/api/lead/{{ place.place_id }}/block"
+                hx-post="/api/leads/{{ place.place_id }}/block"
                 hx-confirm="Tem certeza que deseja adicionar este lead à Blocklist?"
                 hx-target="#lead-row-{{ place.place_id }}"
                 hx-swap="outerHTML"
@@ -125,13 +127,13 @@
                 hx-vals='{"status": "contatado"}'
                 hx-target="#view-container"
             >
+                <svg class="icon icon-whatsapp" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413H.057c11.89-5.335 11.893-11.893 a11.821 11.821 0 0 0-3.48-8.413H8.413Z"/></svg>
                 🚀 Abrir WhatsApp & Marcar Contatado
             </a>
             {% endif %}
         </div>
     </div>
 </div>
-
 <script>
     const PITCH_IA = {{ abordagem.mensagem_whatsapp | tojson }};
     const PITCH_SEM_SITE = "Olá, tudo bem? Notei que o perfil de {{ place.display_name }} tem excelentes avaliações no Google{% if place.rating %} (nota {{ place.rating }}){% endif %}, mas vocês ainda não têm um site próprio oficial. Vocês atendem novos clientes por indicação ou gostariam de receber contatos diretos do Google?";
@@ -145,4 +147,3 @@
         else if (tipo === 'fora_do_ar') txt.value = PITCH_FORA_DO_AR;
         else if (tipo === 'google_site') txt.value = PITCH_GOOGLE_SITE;
     }
-</script>

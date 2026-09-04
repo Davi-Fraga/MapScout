@@ -12,7 +12,11 @@
             <div class="job-title-wrapper">
                 <span class="pulse-indicator"></span>
                 <strong style="color: #fff; font-size: 14px;">
-                    {% if task.tipo == 'varredura' %}🚀 Varredura em Andamento{% else %}⚡ Diagnóstico em Andamento{% endif %}
+                    {% if task.tipo == 'varredura' %}
+                    <svg class="icon icon-scan" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Varredura em Andamento
+                    {% else %}
+                    <svg class="icon icon-zap" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Diagnóstico em Andamento
+                    {% endif %}
                 </strong>
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
@@ -25,7 +29,7 @@
                     hx-swap="none"
                     style="color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);"
                 >
-                    ✕ Parar
+                    <svg class="icon icon-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Parar
                 </button>
             </div>
         </div>
@@ -44,7 +48,7 @@
     <div class="job-card job-completed">
         <div class="job-header">
             <div class="job-title-wrapper">
-                <span style="font-size: 16px;">✅</span>
+                <span style="font-size: 16px; color: #10b981;"><svg class="icon icon-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span>
                 <strong style="color: #fff; font-size: 14px;">Tarefa Concluída com Sucesso!</strong>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -55,13 +59,13 @@
                     hx-swap="innerHTML"
                     onclick="document.getElementById('job-status-banner').innerHTML = ''"
                 >
-                    🔄 Atualizar Tabela
+                    <svg class="icon icon-refresh" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15A9 9 0 0 1 5.64 18.36L1 14"/></svg> Atualizar Tabela
                 </button>
                 <button 
                     class="btn btn-secondary btn-sm"
                     onclick="document.getElementById('job-status-banner').innerHTML = ''"
                 >
-                    ✕
+                    <svg class="icon icon-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
         </div>
@@ -72,14 +76,14 @@
     <div class="job-card job-warning">
         <div class="job-header">
             <div class="job-title-wrapper">
-                <span style="font-size: 16px;">⚠️</span>
+                <span style="font-size: 16px; color: #f59e0b;"><svg class="icon icon-alert-triangle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
                 <strong style="color: #fff; font-size: 14px;">Tarefa Interrompida</strong>
             </div>
             <button 
                 class="btn btn-secondary btn-sm"
                 onclick="document.getElementById('job-status-banner').innerHTML = ''"
             >
-                ✕
+                <svg class="icon icon-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
         <p class="job-message" style="margin-top: 6px;">{{ task.mensagem }}</p>
@@ -89,14 +93,14 @@
     <div class="job-card job-warning">
         <div class="job-header">
             <div class="job-title-wrapper">
-                <span style="font-size: 16px;">🛑</span>
+                <span style="font-size: 16px; color: #f59e0b;"><svg class="icon icon-ban" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></span>
                 <strong style="color: #fff; font-size: 14px;">Teto Diário Atingido</strong>
             </div>
             <button 
                 class="btn btn-secondary btn-sm"
                 onclick="document.getElementById('job-status-banner').innerHTML = ''"
             >
-                ✕
+                <svg class="icon icon-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
         <p class="job-message" style="margin-top: 6px;">{{ task.mensagem }}</p>
@@ -106,14 +110,14 @@
     <div class="job-card job-danger">
         <div class="job-header">
             <div class="job-title-wrapper">
-                <span style="font-size: 16px;">❌</span>
+                <span style="font-size: 16px; color: #ef4444;"><svg class="icon icon-x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
                 <strong style="color: #fff; font-size: 14px;">Falha na Execução</strong>
             </div>
             <button 
                 class="btn btn-secondary btn-sm"
                 onclick="document.getElementById('job-status-banner').innerHTML = ''"
             >
-                ✕
+                <svg class="icon icon-x" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
         <p class="job-message" style="margin-top: 6px;">{{ task.mensagem }}</p>

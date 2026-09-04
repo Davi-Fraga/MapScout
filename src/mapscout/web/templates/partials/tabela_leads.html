@@ -18,50 +18,43 @@
         {% set nivel = p.presence_level if p.presence_level is not none else 0 %}
         <tr class="lead-row" id="lead-row-{{ p.place_id }}">
             <td>
-                <div class="company-title">{{ p.display_name }}</div>
-                <div class="company-sub">
+                <div class="company-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;" title="{{ p.display_name }}">{{ p.display_name }}</div>
+                <div class="company-sub" style="font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;" title="{{ p.cidade or '—' }}">
                     {% if p.website_uri %}
                         <a href="{{ p.website_uri }}" target="_blank" rel="noopener" style="color: var(--text-dim); text-decoration: none;">
-                            🔗 {{ p.website_uri | truncate(35) }}
+                            <svg class="icon icon-link" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> {{ p.website_uri }}
                         </a>
                     {% else %}
-                        <span style="color: var(--accent-amber);">⚠️ Sem site cadastrado</span>
+                        <span style="color: var(--accent-amber);"><svg class="icon icon-alert-triangle" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Sem site cadastrado</span>
                     {% endif %}
                 </div>
             </td>
             <td>
                 <div>{{ p.cidade or "—" }}</div>
-                <div style="font-size: 12px; color: var(--text-dim);">
-                    {{ p.national_phone_number or "Sem telefone" }}
-                </div>
+                <div style="font-size: 12px; color: var(--text-dim);">{{ p.national_phone_number or "Sem telefone" }}</div>
             </td>
             <td>
-                <span class="badge badge-level-{{ nivel }}">
-                    {% if nivel == 0 %}🚫 0 - Sem Site
-                    {% elif nivel == 1 %}⚠️ 1 - Google Site
-                    {% elif nivel == 2 %}🔴 2 - Fora do Ar
-                    {% elif nivel == 3 %}💬 3 - Link WhatsApp
-                    {% elif nivel == 4 %}🚧 4 - Domínio Vazio
-                    {% elif nivel == 5 %}📸 5 - Rede Social
-                    {% elif nivel == 6 %}🏗️ 6 - Construtor Grátis
-                    {% elif nivel == 7 %}🏪 7 - Marketplace
-                    {% elif nivel == 8 %}⚡ 8 - Site Fraco
-                    {% else %}✅ 9 - Saudável
+                <span class="badge {{ 'danger' if nivel == 2 else 'warning' if nivel == 1 else 'neutral' }}">
+                    {% if nivel == 0 %}0 - Sem Site
+                    {% elif nivel == 1 %}1 - Google Site
+                    {% elif nivel == 2 %}2 - Fora do Ar
+                    {% else %}{{ nivel }}-Outro
                     {% endif %}
                 </span>
             </td>
             <td>
                 {% if p.rating %}
-                    <span class="rating-pill">⭐ {{ p.rating }}</span>
-                    <span class="rating-count">({{ p.user_rating_count or 0 }})</span>
+                <span class="rating-pill">⭐ {{ p.rating }}</span>
+                <span class="rating-count">({{ p.user_rating_count or 0 }})</span>
                 {% else %}
-                    <span style="color: var(--text-dim); font-size: 12px;">Sem reviews</span>
+                <span style="color: var(--text-dim); font-size: 12px;">Sem reviews</span>
                 {% endif %}
             </td>
             <td>
-                <span class="score-badge {% if score >= 100 %}score-high{% elif score >= 60 %}score-medium{% else %}score-low{% endif %}">
-                    {{ score }}
-                </span>
+                <div class="score-bar-bg">
+                    <div class="score-bar-fill" style="width: {{ score }}%;"></div>
+                </div>
+                <div style="font-size: 11px; font-weight: 600; text-align: right; color: var(--text-dim);">{{ score }}</div>
             </td>
             <td>
                 <select 
@@ -127,11 +120,9 @@
             ⬅️ Anterior
         </button>
         {% endif %}
-        
         <span style="font-size: 12px; color: var(--text-dim); padding: 0 4px;">
             {{ pagina }} / {{ total_paginas }}
         </span>
-
         {% if pagina < total_paginas %}
         <button 
             type="button"
@@ -146,7 +137,6 @@
         {% endif %}
     </div>
 </div>
-{% endif %}
 {% else %}
 <div style="padding: 48px 24px; text-align: center; color: var(--text-muted);">
     <div style="font-size: 44px; margin-bottom: 12px;">🎯</div>
