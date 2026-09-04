@@ -18,14 +18,14 @@
         {% set nivel = p.presence_level if p.presence_level is not none else 0 %}
         <tr class="lead-row" id="lead-row-{{ p.place_id }}">
             <td>
-                <div class="company-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;" title="{{ p.display_name }}">{{ p.display_name }}</div>
-                <div class="company-sub" style="font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;" title="{{ p.cidade or '—' }}">
+                <div class="company-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" title="{{ p.display_name }}">{{ p.display_name }}</div>
+                <div class="company-sub" style="font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" title="{{ p.cidade or '—' }}">
                     {% if p.website_uri %}
-                        <a href="{{ p.website_uri }}" target="_blank" rel="noopener" style="color: var(--text-dim); text-decoration: none;">
-                            <svg class="icon icon-link" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> {{ p.website_uri }}
+                        <a href="{{ p.website_uri }}" target="_blank" rel="noopener" style="color: var(--text-dim); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            <i data-lucide="link" class="lucide-icon-xs"></i> {{ p.website_uri }}
                         </a>
                     {% else %}
-                        <span style="color: var(--accent-amber);"><svg class="icon icon-alert-triangle" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Sem site cadastrado</span>
+                        <span style="color: var(--accent-amber); display: inline-flex; align-items: center; gap: 4px;"><i data-lucide="alert-triangle" class="lucide-icon-xs"></i> Sem site cadastrado</span>
                     {% endif %}
                 </div>
             </td>
@@ -44,7 +44,7 @@
             </td>
             <td>
                 {% if p.rating %}
-                <span class="rating-pill">⭐ {{ p.rating }}</span>
+                <span class="rating-pill"><i data-lucide="star" class="lucide-icon-xs text-yellow-400"></i> {{ p.rating }}</span>
                 <span class="rating-count">({{ p.user_rating_count or 0 }})</span>
                 {% else %}
                 <span style="color: var(--text-dim); font-size: 12px;">Sem reviews</span>
@@ -82,6 +82,7 @@
                         hx-target="#modal-container"
                         hx-swap="innerHTML"
                     >
+                        <i data-lucide="file-search" class="lucide-icon-xs"></i>
                         Auditoria & Pitch
                     </button>
                     {% if p.national_phone_number %}
@@ -92,6 +93,7 @@
                         class="btn btn-whatsapp btn-sm"
                         title="Abrir WhatsApp direto"
                     >
+                        <i data-lucide="message-circle" class="lucide-icon-xs"></i>
                         WhatsApp
                     </a>
                     {% endif %}
@@ -117,7 +119,7 @@
             hx-target="#leads-tabela-container"
             hx-swap="innerHTML"
         >
-            ⬅️ Anterior
+            <i data-lucide="chevron-left" class="lucide-icon-xs"></i> Anterior
         </button>
         {% endif %}
         <span style="font-size: 12px; color: var(--text-dim); padding: 0 4px;">
@@ -132,7 +134,7 @@
             hx-target="#leads-tabela-container"
             hx-swap="innerHTML"
         >
-            Próxima ➡️
+            Próxima <i data-lucide="chevron-right" class="lucide-icon-xs"></i>
         </button>
         {% endif %}
     </div>
@@ -140,7 +142,7 @@
 {% endif %}
 {% else %}
 <div style="padding: 48px 24px; text-align: center; color: var(--text-muted);">
-    <div style="font-size: 44px; margin-bottom: 12px;">🎯</div>
+    <div style="margin-bottom: 12px;"><i data-lucide="target" style="width: 44px; height: 44px; color: var(--brand-primary); margin: 0 auto;"></i></div>
     <div style="font-size: 18px; font-weight: 700; color: #fff;">Sua base de leads está pronta para a primeira coleta!</div>
     <div style="font-size: 14px; margin-top: 6px; max-width: 500px; margin-left: auto; margin-right: auto;">
         Escolha uma categoria de negócios (ex: Dentistas, Clínicas, Advogados) e uma cidade para mapear as empresas e seus sites.
@@ -153,7 +155,7 @@
             hx-swap="innerHTML"
             style="padding: 10px 22px; font-size: 14px;"
         >
-            🚀 Iniciar Minha Primeira Varredura
+            <i data-lucide="sparkles" class="lucide-icon-sm"></i> Iniciar Minha Primeira Varredura
         </button>
     </div>
 </div>

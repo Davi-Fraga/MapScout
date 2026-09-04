@@ -2,8 +2,8 @@
     <div class="modal-content" style="max-width: 640px;">
         <div class="modal-header">
             <div>
-                <h2 style="font-size: 20px; font-weight: 700; color: #fff;">
-                    <svg class="icon icon-scan" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Nova Varredura de Mercado
+                <h2 style="font-size: 20px; font-weight: 700; color: #fff; display: inline-flex; align-items: center; gap: 8px;">
+                    <i data-lucide="search-code" class="lucide-icon-sm"></i> Nova Varredura de Mercado
                 </h2>
                 <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
                     Encontre empresas locais e descubra oportunidades de vendas em segundo plano.
@@ -77,13 +77,13 @@
             <!-- Memória Geográfica: Zonas já Varridas -->
             {% if zonas_recentes %}
             <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: var(--radius-sm); padding: 10px 14px;">
-                <div style="font-size: 12px; font-weight: 700; color: var(--accent-blue); margin-bottom: 6px;">
-                    <svg class="icon icon-compass" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Memória de Radar: Zonas Já Mapeadas
+                <div style="font-size: 12px; font-weight: 700; color: var(--accent-blue); margin-bottom: 6px; display: inline-flex; align-items: center; gap: 6px;">
+                    <i data-lucide="compass" class="lucide-icon-xs"></i> Memória de Radar: Zonas Já Mapeadas
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     {% for z in zonas_recentes[:4] %}
-                    <span style="font-size: 11px; background: rgba(255, 255, 255, 0.05); padding: 4px 8px; border-radius: 4px; color: var(--text-main);">
-                        <svg class="icon icon-check" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><polyline points="20 6 9 17 4 12"/></svg> {{ z.cidade }} ({{ z.categoria }}): {{ z.total_encontrados }} leads
+                    <span style="font-size: 11px; background: rgba(255, 255, 255, 0.05); padding: 4px 8px; border-radius: 4px; color: var(--text-main); display: inline-flex; align-items: center; gap: 4px;">
+                        <i data-lucide="check" class="lucide-icon-xs"></i> {{ z.cidade }} ({{ z.categoria }}): {{ z.total_encontrados }} leads
                     </span>
                     {% endfor %}
                 </div>
@@ -102,8 +102,8 @@
 
             <!-- Coordenadas Geográficas & Deslocamento de Bairros -->
             <details style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 14px;">
-                <summary style="font-size: 12px; color: var(--text-muted); cursor: pointer; font-weight: 600;">
-                    <svg class="icon icon-map-pin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Centro Geográfico & Deslocamento para Outros Bairros
+                <summary style="font-size: 12px; color: var(--text-muted); cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                    <i data-lucide="map-pin" class="lucide-icon-xs"></i> Centro Geográfico & Deslocamento para Outros Bairros
                 </summary>
                 
                 <div style="margin-top: 10px;">
@@ -111,10 +111,10 @@
                         Quer buscar em outro canto da cidade? Desloque o centro da busca com 1 clique:
                     </div>
                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('norte')"><svg class="icon icon-arrow-up" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg> Norte (+5km)</button>
-                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('sul')"><svg class="icon icon-arrow-down" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> Sul (+5km)</button>
-                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('leste')"><svg class="icon icon-arrow-right" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> Leste (+5km)</button>
-                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('oeste')"><svg class="icon icon-arrow-left" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Oeste (+5km)</button>
+                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('norte')"><i data-lucide="arrow-up" class="lucide-icon-xs"></i> Norte (+5km)</button>
+                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('sul')"><i data-lucide="arrow-down" class="lucide-icon-xs"></i> Sul (+5km)</button>
+                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('leste')"><i data-lucide="arrow-right" class="lucide-icon-xs"></i> Leste (+5km)</button>
+                        <button type="button" class="btn-preset" onclick="deslocarCoordenadas('oeste')"><i data-lucide="arrow-left" class="lucide-icon-xs"></i> Oeste (+5km)</button>
                     </div>
                 </div>
 
@@ -137,7 +137,7 @@
             <div class="modal-actions" style="margin-top: 6px;">
                 <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="btn-iniciar-varredura">
-                    <svg class="icon icon-scan" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Iniciar Varredura em Segundo Plano
+                    <i data-lucide="search" class="lucide-icon-xs"></i> Iniciar Varredura em Segundo Plano
                 </button>
             </div>
         </form>

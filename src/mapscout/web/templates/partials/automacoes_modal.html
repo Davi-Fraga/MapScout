@@ -2,7 +2,7 @@
     <div class="modal-content" style="max-width: 680px;">
         <div class="modal-header">
             <div>
-                <h2 style="font-size: 20px; font-weight: 700; color: #fff;"><svg class="icon icon-clock" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Automações em Segundo Plano</h2>
+                <h2 style="font-size: 20px; font-weight: 700; color: #fff; display: inline-flex; align-items: center; gap: 8px;"><i data-lucide="clock" class="lucide-icon-sm"></i> Automações em Segundo Plano</h2>
                 <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
                     Rotinas gerenciadas pelo <strong>APScheduler</strong> para manutenção e conformidade contínua.
                 </p>
@@ -29,7 +29,7 @@
                         hx-swap="innerHTML"
                         style="white-space: nowrap;"
                     >
-                        <svg class="icon icon-play" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="vertical-align: middle;"><polygon points="6 4 20 12 6 20 6 4"/></svg> Executar Agora
+                        <i data-lucide="play" class="lucide-icon-xs"></i> Executar Agora
                     </button>
                 </div>
 
@@ -53,8 +53,9 @@
             {% endfor %}
         </div>
 
-        <div style="margin-top: 16px; padding: 12px; background: rgba(59, 130, 246, 0.08); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2); font-size: 12px; color: #93c5fd;">
-            <svg class="icon icon-info" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> <strong>Regra 118 do CLAUDE.md:</strong> Conforme termos da Places API, os dados de ficha cadastrais são re-checados a cada 60 dias para manter a base sempre legal e atualizada.
+        <div style="margin-top: 16px; padding: 12px; background: rgba(59, 130, 246, 0.08); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2); font-size: 12px; color: #93c5fd; display: flex; align-items: flex-start; gap: 8px;">
+            <i data-lucide="info" class="lucide-icon-sm" style="flex-shrink: 0; margin-top: 2px;"></i>
+            <span><strong>Regra do Sistema:</strong> Conforme termos da Places API, os dados de ficha cadastrais são re-checados a cada 60 dias para manter a base sempre legal e atualizada.</span>
         </div>
 
         <div class="modal-actions" style="margin-top: 16px;">

@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MapScout — Prospecção de Vendas de Sites{% endblock %}</title>
-    <!-- HTMX para interatividade sem JavaScript complexo -->
+    <title>{% block title %}MapScout — Prospecção de Vendas de Sites{% endblock %}</tit    <!-- HTMX para interatividade sem JavaScript complexo -->
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <!-- Lucide Icons para UI/UX profissional -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +16,7 @@
     <header class="navbar">
         <div class="container nav-content">
             <div class="brand">
-                <svg class="icon icon-radar" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/><path d="M12 2a10 10 0 0 0 0 20"/></svg>
+                <i data-lucide="radar" class="brand-lucide-icon"></i>
                 <div class="brand-text">
                     <span class="brand-title">MapScout</span>
                     <span class="brand-badge">Radar de Oportunidades</span>
@@ -29,7 +30,7 @@
                     hx-target="#modal-container"
                     hx-swap="innerHTML"
                 >
-                    <svg class="icon icon-scan" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <i data-lucide="search" class="lucide-icon-sm"></i>
                     Nova Varredura
                 </button>
                 <button 
@@ -38,7 +39,7 @@
                     hx-target="#job-status-banner"
                     hx-swap="outerHTML"
                 >
-                    <svg class="icon icon-zap" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <i data-lucide="sparkles" class="lucide-icon-sm text-amber-400"></i>
                     Enriquecer
                 </button>
                 <button 
@@ -47,26 +48,26 @@
                     hx-target="#modal-container"
                     hx-swap="innerHTML"
                 >
-                    <svg class="icon icon-clock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <i data-lucide="clock" class="lucide-icon-sm"></i>
                     Automações
                 </button>
                 <a href="/exportar" class="btn btn-secondary btn-sm" download>
-                    <svg class="icon icon-download" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <i data-lucide="download" class="lucide-icon-sm"></i>
                     CSV
                 </a>
                 <div style="display: flex; align-items: center; gap: 10px; margin-left: 8px; padding-left: 12px; border-left: 1px solid var(--border-subtle);">
-                    <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">
-                        <svg class="icon icon-user" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align: middle;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> {{ request.state.usuario if request.state and request.state.usuario else "Conectado" }}
+                    <span style="font-size: 13px; color: var(--text-muted); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                        <i data-lucide="user" class="lucide-icon-sm"></i> {{ request.state.usuario if request.state and request.state.usuario else "Conectado" }}
                     </span>
                     <a href="/logout" class="btn btn-secondary btn-sm" style="color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);" title="Encerrar sessão">
-                        <svg class="icon icon-log-out" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        <i data-lucide="log-out" class="lucide-icon-sm"></i>
                         Sair
                     </a>
                 </div>
             </nav>
         </div>
     </header>
- 
+
     <main class="container main-content">
         <div id="job-status-banner">
             {% if task %}
@@ -75,9 +76,9 @@
         </div>
         {% block content %}{% endblock %}
     </main>
- 
+
     <div id="modal-container"></div>
- 
+
     <script>
         function copiarTexto(elementId, btn) {
             const el = document.getElementById(elementId);
@@ -92,11 +93,19 @@
                 }, 2000);
             });
         }
- 
+
         function fecharModal() {
             const modal = document.querySelector('.modal-overlay');
             if (modal) modal.remove();
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+        document.body.addEventListener('htmx:afterSettle', () => {
+            if (window.lucide) lucide.createIcons();
+        });
     </script>
 </body>
+</html>>
 </html>
